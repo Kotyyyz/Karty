@@ -1,4 +1,5 @@
 {
   "title": "My Cards",
-  "add_card": "Add Card"
+  "add_card": "+",
+  "select_store": "Select Store"
 }

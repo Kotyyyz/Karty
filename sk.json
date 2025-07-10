@@ -1,4 +1,5 @@
 {
   "title": "Moje Karty",
-  "add_card": "Pridať kartu"
+  "add_card": "+",
+  "select_store": "Vyber obchod"
 }
