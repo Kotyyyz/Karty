@@ -3,17 +3,19 @@ const langSelect = document.getElementById('lang-select');
 let currentLang = 'cs';
 let translations = {};
 
-// Načti jazyk z localStorage (pokud je), jinak cs
-let savedLang = localStorage.getItem('lang');
-currentLang = savedLang || 'cs';
-langSelect.value = currentLang;
+document.addEventListener("DOMContentLoaded", () => {
+  let savedLang = localStorage.getItem('lang');
+  currentLang = savedLang || 'cs';
+  langSelect.value = currentLang;
+  loadLang(currentLang);
+});
 
 function loadLang(lang) {
   fetch(`lang/${lang}.json`)
     .then(res => res.json())
     .then(data => {
       translations = data;
-      applyTranslations();
+      setTimeout(applyTranslations, 0);
     });
 }
 
@@ -24,12 +26,9 @@ function applyTranslations() {
 }
 
 langSelect.addEventListener('change', (e) => {
-  const newLang = e.target.value;
-  localStorage.setItem('lang', newLang);
-  location.reload();  // refresh pro aplikaci nového jazyka
+  localStorage.setItem('lang', e.target.value);
+  location.reload();
 });
-
-loadLang(currentLang);
 
 // 🌙 Přepínání tématu
 const themeToggle = document.getElementById('theme-toggle');
@@ -44,11 +43,9 @@ themeToggle.addEventListener('click', () => {
 // ➕ Přidání karty
 const modal = document.getElementById('shop-modal');
 const shopButtons = document.querySelectorAll('.shop-btn');
-
 document.getElementById('add-card-btn').addEventListener('click', () => {
   modal.classList.remove('hidden');
 });
-
 shopButtons.forEach(btn => {
   btn.addEventListener('click', () => {
     const shop = btn.dataset.shop;
@@ -57,48 +54,70 @@ shopButtons.forEach(btn => {
   });
 });
 
-// 📸 Skener
+// 🧾 Skener modal
 const scannerModal = document.getElementById("scanner-modal");
 const scannerElement = document.getElementById("scanner");
 const closeScannerBtn = document.getElementById("close-scanner");
+let html5QrCode; // pro QR čtečku
 
-function startScanner(cardId, updateBarcodeText) {
+function startScanner(cardId, shop, onScanComplete) {
   scannerModal.classList.remove("hidden");
+  scannerElement.innerHTML = ""; // Vyčisti scanner div
 
-  Quagga.init({
-    inputStream: {
-      name: "Live",
-      type: "LiveStream",
-      target: scannerElement
-    },
-    decoder: {
-      readers: ["ean_reader", "ean_13_reader", "code_128_reader"]
-    }
-  }, function(err) {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    Quagga.start();
-  });
+  if (shop === "kaufland") {
+    // 📷 QR Scanner (html5-qrcode)
+    html5QrCode = new Html5Qrcode("scanner");
+    html5QrCode.start(
+      { facingMode: "environment" },
+      {
+        fps: 10,
+        qrbox: 250,
+      },
+      (decodedText, decodedResult) => {
+        html5QrCode.stop();
+        scannerModal.classList.add("hidden");
+        onScanComplete(decodedText);
+        saveBarcode(cardId, decodedText);
+      },
+      (err) => {}
+    );
+  } else {
+    // 📷 Čárový kód (Quagga)
+    Quagga.init({
+      inputStream: {
+        name: "Live",
+        type: "LiveStream",
+        target: scannerElement
+      },
+      decoder: {
+        readers: ["ean_reader", "ean_13_reader", "code_128_reader"]
+      }
+    }, function (err) {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      Quagga.start();
+    });
 
-  Quagga.onDetected(data => {
-    const code = data.codeResult.code;
-    Quagga.stop();
-    scannerModal.classList.add("hidden");
-    updateBarcodeText(code);
-    saveBarcode(cardId, code);
-  });
+    Quagga.onDetected(data => {
+      const code = data.codeResult.code;
+      Quagga.stop();
+      scannerModal.classList.add("hidden");
+      onScanComplete(code);
+      saveBarcode(cardId, code);
+    });
+  }
 }
 
 closeScannerBtn.addEventListener("click", () => {
-  Quagga.stop();
+  Quagga.stop && Quagga.stop();
+  html5QrCode && html5QrCode.stop();
   scannerModal.classList.add("hidden");
 });
 
-// 💾 Ukládání a vykreslování karet
+// 💾 Ukládání a vykreslování
 
-// Vykreslí kartu bez ukládání (pro načítání z localStorage)
 function renderCard(card) {
   const grid = document.getElementById('card-grid');
 
@@ -108,16 +127,15 @@ function renderCard(card) {
 
   cardDiv.innerHTML = `
     <div class="text-lg font-bold capitalize">${card.shop}</div>
-    <div class="barcode-text text-sm mb-2">${card.barcode || "(žádný kód)"}</div>
+    <div class="barcode-text text-sm mb-2 break-words">${card.barcode || "(žádný kód)"}</div>
     <button class="scan-btn bg-gray-200 dark:bg-gray-600 px-4 py-2 rounded mt-auto" data-shop="${card.shop}">📷 Skenovat</button>
     <button class="manual-btn text-xs mt-1 underline">✍️ Zadat ručně</button>
     <button class="delete-btn text-xs mt-2 text-red-600 underline">🗑️ Smazat</button>
   `;
 
   cardDiv.querySelector(".scan-btn").addEventListener("click", () => {
-    startScanner(card.id, (code) => {
+    startScanner(card.id, card.shop, (code) => {
       cardDiv.querySelector(".barcode-text").textContent = code;
-      saveBarcode(card.id, code);
     });
   });
 
@@ -139,35 +157,30 @@ function renderCard(card) {
   grid.appendChild(cardDiv);
 }
 
-// Vytvoří novou kartu, uloží ji a vykreslí
 function createNewCard(shop) {
   const card = { id: Date.now().toString(), shop, barcode: "" };
   saveNewCard(card);
   renderCard(card);
 }
 
-// Uloží novou kartu do localStorage
 function saveNewCard(card) {
   let cards = JSON.parse(localStorage.getItem("cards") || "[]");
   cards.push(card);
   localStorage.setItem("cards", JSON.stringify(cards));
 }
 
-// Aktualizuje barcode konkrétní karty podle ID
 function saveBarcode(cardId, barcode) {
   let cards = JSON.parse(localStorage.getItem("cards") || "[]");
-  cards = cards.map(c => c.id === cardId ? {...c, barcode} : c);
+  cards = cards.map(c => c.id === cardId ? { ...c, barcode } : c);
   localStorage.setItem("cards", JSON.stringify(cards));
 }
 
-// Smaže kartu z localStorage podle ID
 function deleteCard(cardId) {
   let cards = JSON.parse(localStorage.getItem("cards") || "[]");
   cards = cards.filter(c => c.id !== cardId);
   localStorage.setItem("cards", JSON.stringify(cards));
 }
 
-// Načte všechny uložené karty a vykreslí je
 function loadCards() {
   const cards = JSON.parse(localStorage.getItem("cards") || "[]");
   cards.forEach(card => renderCard(card));
