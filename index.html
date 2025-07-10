@@ -5,45 +5,59 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Karty</title>
 
-  <!-- ✅ Tailwind CSS (CDN) -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- ✅ Ikonky (Heroicons) -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- QuaggaJS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 
-  <!-- ✅ Vlastní CSS -->
+  <!-- Vlastní CSS -->
   <link rel="stylesheet" href="style.css" />
-
 </head>
 <body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white min-h-screen transition-colors duration-300">
 
-  <!-- 🧭 Hlavička -->
+  <!-- Hlavička -->
   <header class="flex justify-between items-center p-4 border-b dark:border-gray-700">
     <div class="flex gap-2">
-      <!-- Přepínač jazyka -->
       <select id="lang-select" class="bg-transparent border px-2 py-1 rounded">
         <option value="cs">Čeština</option>
         <option value="sk">Slovenčina</option>
         <option value="en">English</option>
       </select>
-
-      <!-- Přepínač tématu -->
-      <button id="theme-toggle" class="border px-2 py-1 rounded">
-        🌙 / ☀️
-      </button>
+      <button id="theme-toggle" class="border px-2 py-1 rounded">🌙 / ☀️</button>
     </div>
-    <h1 class="text-xl font-bold">Moje Karty</h1>
+    <h1 id="title" class="text-xl font-bold">Moje Karty</h1>
   </header>
 
-  <!-- 🗃️ Grid karet -->
+  <!-- Grid karet -->
   <main id="card-grid" class="grid grid-cols-2 gap-4 p-4">
-    <!-- Šedá karta s pluskem -->
     <div id="add-card-btn" class="flex items-center justify-center border-2 border-dashed rounded-2xl aspect-[3/2] cursor-pointer bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition">
-      <div class="text-4xl text-gray-400">+</div>
+      <div id="add-card-label" class="text-4xl text-gray-400">+</div>
     </div>
   </main>
 
-  <!-- ✅ Script -->
+  <!-- Modal obchodů -->
+  <div id="shop-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl max-w-md w-full">
+      <h2 class="text-xl font-bold mb-4" id="select-store-label">Vyber obchod</h2>
+      <div class="grid grid-cols-1 gap-4">
+        <button class="shop-btn bg-blue-100 p-4 rounded-xl" data-shop="lidl">Lidl</button>
+        <button class="shop-btn bg-green-100 p-4 rounded-xl" data-shop="kaufland">Kaufland</button>
+        <button class="shop-btn bg-red-100 p-4 rounded-xl" data-shop="tesco">Tesco</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal skeneru -->
+  <div id="scanner-modal" class="fixed inset-0 bg-black bg-opacity-70 hidden justify-center items-center z-50">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl w-full max-w-md">
+      <h2 class="text-xl font-bold mb-4">Naskenuj kartu</h2>
+      <div id="scanner" class="w-full h-60 bg-black rounded"></div>
+      <button id="close-scanner" class="mt-4 px-4 py-2 bg-red-500 text-white rounded">Zavřít</button>
+    </div>
+  </div>
+
+  <!-- Script -->
   <script src="script.js"></script>
 </body>
 </html>
