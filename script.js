@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   currentLang = savedLang || 'cs';
   langSelect.value = currentLang;
   loadLang(currentLang);
+  loadCards();
 });
 
 function loadLang(lang) {
@@ -46,6 +47,9 @@ const shopButtons = document.querySelectorAll('.shop-btn');
 document.getElementById('add-card-btn').addEventListener('click', () => {
   modal.classList.remove('hidden');
 });
+document.getElementById("close-shop-modal")?.addEventListener("click", () => {
+  modal.classList.add("hidden");
+});
 shopButtons.forEach(btn => {
   btn.addEventListener('click', () => {
     const shop = btn.dataset.shop;
@@ -58,21 +62,17 @@ shopButtons.forEach(btn => {
 const scannerModal = document.getElementById("scanner-modal");
 const scannerElement = document.getElementById("scanner");
 const closeScannerBtn = document.getElementById("close-scanner");
-let html5QrCode; // pro QR čtečku
+let html5QrCode;
 
 function startScanner(cardId, shop, onScanComplete) {
   scannerModal.classList.remove("hidden");
-  scannerElement.innerHTML = ""; // Vyčisti scanner div
+  scannerElement.innerHTML = "";
 
   if (shop === "kaufland") {
-    // 📷 QR Scanner (html5-qrcode)
     html5QrCode = new Html5Qrcode("scanner");
     html5QrCode.start(
       { facingMode: "environment" },
-      {
-        fps: 10,
-        qrbox: 250,
-      },
+      { fps: 10, qrbox: 250 },
       (decodedText, decodedResult) => {
         html5QrCode.stop();
         scannerModal.classList.add("hidden");
@@ -82,7 +82,6 @@ function startScanner(cardId, shop, onScanComplete) {
       (err) => {}
     );
   } else {
-    // 📷 Čárový kód (Quagga)
     Quagga.init({
       inputStream: {
         name: "Live",
@@ -117,20 +116,18 @@ closeScannerBtn.addEventListener("click", () => {
 });
 
 // 💾 Ukládání a vykreslování
-
 function renderCard(card) {
   const grid = document.getElementById('card-grid');
-
   const cardDiv = document.createElement('div');
-  cardDiv.className = "relative border rounded-2xl aspect-[3/2] bg-white dark:bg-gray-700 p-4 shadow flex flex-col justify-between";
+  cardDiv.className = `relative border rounded-2xl aspect-[3/2] p-4 shadow flex flex-col justify-between text-white ${card.shop === 'kaufland' ? 'bg-red-700' : card.shop === 'lidl' ? 'bg-blue-700' : card.shop === 'tesco' ? 'bg-green-700' : 'bg-gray-700'}`;
   cardDiv.dataset.id = card.id;
 
   cardDiv.innerHTML = `
     <div class="text-lg font-bold capitalize">${card.shop}</div>
     <div class="barcode-text text-sm mb-2 break-words">${card.barcode || "(žádný kód)"}</div>
-    <button class="scan-btn bg-gray-200 dark:bg-gray-600 px-4 py-2 rounded mt-auto" data-shop="${card.shop}">📷 Skenovat</button>
+    <button class="scan-btn bg-white/20 px-4 py-2 rounded mt-auto">📷 Skenovat</button>
     <button class="manual-btn text-xs mt-1 underline">✍️ Zadat ručně</button>
-    <button class="delete-btn text-xs mt-2 text-red-600 underline">🗑️ Smazat</button>
+    <button class="delete-btn text-xs mt-2 text-red-200 underline">🗑️ Smazat</button>
   `;
 
   cardDiv.querySelector(".scan-btn").addEventListener("click", () => {
@@ -158,6 +155,10 @@ function renderCard(card) {
 }
 
 function createNewCard(shop) {
+  const cards = JSON.parse(localStorage.getItem("cards") || "[]");
+  const existing = cards.find(c => c.shop === shop);
+  if (existing) return; // zabrání duplikaci
+
   const card = { id: Date.now().toString(), shop, barcode: "" };
   saveNewCard(card);
   renderCard(card);
@@ -185,5 +186,3 @@ function loadCards() {
   const cards = JSON.parse(localStorage.getItem("cards") || "[]");
   cards.forEach(card => renderCard(card));
 }
-
-loadCards();
