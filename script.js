@@ -2,7 +2,7 @@ let selectedShop = null;
 
 // Jazyk přepínač (placeholder)
 document.getElementById("lang-select").addEventListener("change", () => {
-  // později doplníme
+  // Později rozšíříme
 });
 
 // Téma přepínání
@@ -24,6 +24,11 @@ document.getElementById("modal-close").addEventListener("click", () => {
 document.getElementById("scan-close").addEventListener("click", () => {
   document.getElementById("scan-modal").classList.add("hidden");
   stopScanner();
+});
+
+// Zavřít display modal
+document.getElementById("display-close").addEventListener("click", () => {
+  document.getElementById("display-modal").classList.add("hidden");
 });
 
 // Výběr obchodu
@@ -49,7 +54,7 @@ function startScanner() {
         document.getElementById("scan-modal").classList.add("hidden");
       });
     },
-    (error) => { /* ignorujeme chyby */ }
+    (error) => { /* Ignorujeme chyby */ }
   );
 }
 
@@ -154,20 +159,14 @@ function deleteCard(index) {
   renderCards();
 }
 
-// Zobrazení kódu
+// Zobrazení QR kódu v modalu
 function showBarcode(code) {
-  const win = window.open("", "barcode", "width=400,height=400");
-  win.document.write(`
-    <html>
-      <body style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;">
-        <div style="text-align:center;">
-          <p style="font-size: 1.2em; margin-bottom: 1em;">${code}</p>
-          <img src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(code)}&size=200x200" alt="QR Code" />
-        </div>
-      </body>
-    </html>`);
-  win.document.close();
+  document.getElementById("display-code-img").src =
+    `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(code)}&size=200x200`;
+  document.getElementById("display-code-text").textContent = code;
+  document.getElementById("display-title").textContent = "Tvůj kód";
+  document.getElementById("display-modal").classList.remove("hidden");
 }
 
-// Načti karty
+// Načti karty při startu
 renderCards();
