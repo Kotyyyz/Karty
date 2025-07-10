@@ -105,19 +105,22 @@ function renderCards() {
   const cards = JSON.parse(localStorage.getItem("cards") || "[]");
 
   cards.forEach((card, index) => {
+    const isDarkText = card.shop === "Lidl";
+    const cardColor = getCardColor(card.shop);
+
     const div = document.createElement("div");
-    div.className = `relative ${getCardColor(card.shop)} p-4 rounded-2xl aspect-[3/2] flex flex-col justify-center items-center text-center cursor-pointer shadow hover:shadow-lg transition`;
+    div.className = `relative ${cardColor} p-4 rounded-2xl aspect-[3/2] flex flex-col justify-center items-center text-center cursor-pointer shadow hover:shadow-lg transition ${isDarkText ? 'text-black' : 'text-white'}`;
 
     const icon = document.createElement("div");
-    icon.className = "text-4xl";
+    icon.className = "text-4xl pointer-events-none";
     icon.textContent = getIcon(card.shop);
 
     const title = document.createElement("div");
-    title.className = "text-lg font-semibold mt-2";
+    title.className = "text-lg font-semibold mt-2 pointer-events-none";
     title.textContent = card.shop;
 
     const del = document.createElement("button");
-    del.className = "absolute top-2 right-2 text-black/60 hover:text-red-500 font-bold";
+    del.className = `absolute top-2 right-2 font-bold ${isDarkText ? 'text-black/60' : 'text-white/70'} hover:text-red-500`;
     del.textContent = "🗑";
     del.onclick = (e) => {
       e.stopPropagation();
@@ -132,7 +135,7 @@ function renderCards() {
     grid.appendChild(div);
   });
 
-  // Tlačítko pro přidání
+  // Přidat tlačítko
   const addBtn = document.createElement("div");
   addBtn.id = "add-card-btn";
   addBtn.className = "flex items-center justify-center border-2 border-dashed rounded-2xl aspect-[3/2] cursor-pointer bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition";
