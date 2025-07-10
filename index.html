@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="cs" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Karty</title>
+
+  <!-- ✅ Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- ✅ Ikonky (Heroicons) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- ✅ Vlastní CSS -->
+  <link rel="stylesheet" href="style.css" />
+
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white min-h-screen transition-colors duration-300">
+
+  <!-- 🧭 Hlavička -->
+  <header class="flex justify-between items-center p-4 border-b dark:border-gray-700">
+    <div class="flex gap-2">
+      <!-- Přepínač jazyka -->
+      <select id="lang-select" class="bg-transparent border px-2 py-1 rounded">
+        <option value="cs">Čeština</option>
+        <option value="sk">Slovenčina</option>
+        <option value="en">English</option>
+      </select>
+
+      <!-- Přepínač tématu -->
+      <button id="theme-toggle" class="border px-2 py-1 rounded">
+        🌙 / ☀️
+      </button>
+    </div>
+    <h1 class="text-xl font-bold">Moje Karty</h1>
+  </header>
+
+  <!-- 🗃️ Grid karet -->
+  <main id="card-grid" class="grid grid-cols-2 gap-4 p-4">
+    <!-- Šedá karta s pluskem -->
+    <div id="add-card-btn" class="flex items-center justify-center border-2 border-dashed rounded-2xl aspect-[3/2] cursor-pointer bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+      <div class="text-4xl text-gray-400">+</div>
+    </div>
+  </main>
+
+  <!-- ✅ Script -->
+  <script src="script.js"></script>
+</body>
+</html>
