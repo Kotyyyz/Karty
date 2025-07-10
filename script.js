@@ -2,13 +2,11 @@ let selectedShop = null;
 let selectedScanType = "qr";
 let html5QrCode;
 
-// Přepínač tématu
 const themeToggle = document.getElementById("theme-toggle");
 themeToggle.addEventListener("click", () => {
   document.documentElement.classList.toggle("dark");
 });
 
-// Přidání karty
 const addCardBtn = document.getElementById("add-card-btn");
 addCardBtn.addEventListener("click", () => {
   document.getElementById("shop-modal").classList.remove("hidden");
@@ -25,6 +23,10 @@ document.getElementById("scan-type-close").onclick = () => {
 document.getElementById("scan-close").onclick = () => {
   stopScanner();
   document.getElementById("scan-modal").classList.add("hidden");
+};
+
+document.getElementById("display-close").onclick = () => {
+  document.getElementById("display-modal").classList.add("hidden");
 };
 
 document.querySelectorAll(".shop-option").forEach(btn => {
@@ -102,7 +104,7 @@ function stopScanner() {
 
 function saveCard(shop, code) {
   const cards = JSON.parse(localStorage.getItem("cards") || "[]");
-  cards.push({ shop, code });
+  cards.push({ shop, code, type: selectedScanType }); // přidáme typ
   localStorage.setItem("cards", JSON.stringify(cards));
   renderCards();
 }
@@ -167,16 +169,25 @@ function getCardColor(shop) {
 }
 
 function showBarcode(code) {
-  const win = window.open("", "barcode", "width=400,height=400");
-  win.document.write(`
-    <html><body style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;">
-      <div style="text-align:center;">
-        <p style="font-size: 1.2em; margin-bottom: 1em;">${code}</p>
-        <img src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(code)}&size=200x200" alt="QR Code" />
-      </div>
-    </body></html>
-  `);
-  win.document.close();
+  const cards = JSON.parse(localStorage.getItem("cards") || "[]");
+  const card = cards.find(c => c.code === code);
+  if (!card) return;
+
+  const modal = document.getElementById("display-modal");
+  const title = document.getElementById("display-title");
+  const img = document.getElementById("display-code-img");
+  const text = document.getElementById("display-code-text");
+
+  title.textContent = card.shop;
+  text.textContent = card.code;
+
+  if (card.type === "qr") {
+    img.src = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(card.code)}&size=200x200`;
+  } else {
+    img.src = `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(card.code)}&code=Code128&multiplebarcodes=false`;
+  }
+
+  modal.classList.remove("hidden");
 }
 
 renderCards();
