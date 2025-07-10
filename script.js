@@ -2,10 +2,10 @@ let selectedShop = null;
 
 // Jazyk přepínač (placeholder)
 document.getElementById("lang-select").addEventListener("change", () => {
-  // doplníme později
+  // později doplníme
 });
 
-// Téma
+// Téma přepínání
 document.getElementById("theme-toggle").addEventListener("click", () => {
   document.documentElement.classList.toggle("dark");
 });
@@ -49,9 +49,7 @@ function startScanner() {
         document.getElementById("scan-modal").classList.add("hidden");
       });
     },
-    (error) => {
-      // Ignorujeme chyby během skenování
-    }
+    (error) => { /* ignorujeme chyby */ }
   );
 }
 
@@ -71,7 +69,7 @@ document.getElementById("confirm-code").addEventListener("click", () => {
   }
 });
 
-// Uložení do localStorage
+// Uložení karty
 function saveCard(shop, code) {
   const cards = JSON.parse(localStorage.getItem("cards") || "[]");
   cards.push({ shop, code });
@@ -79,7 +77,7 @@ function saveCard(shop, code) {
   renderCards();
 }
 
-// Získání ikony pro obchod
+// Ikona obchodu
 function getIcon(shop) {
   switch (shop) {
     case "Lidl": return "🛒";
@@ -89,7 +87,17 @@ function getIcon(shop) {
   }
 }
 
-// Render karet
+// Barva pozadí podle obchodu
+function getCardColor(shop) {
+  switch (shop) {
+    case "Lidl": return "bg-yellow-300";
+    case "Kaufland": return "bg-red-500 text-white";
+    case "Tesco": return "bg-blue-600 text-white";
+    default: return "bg-gray-200";
+  }
+}
+
+// Vykreslení karet
 function renderCards() {
   const grid = document.getElementById("card-grid");
   grid.innerHTML = '';
@@ -98,7 +106,7 @@ function renderCards() {
 
   cards.forEach((card, index) => {
     const div = document.createElement("div");
-    div.className = "relative bg-white dark:bg-gray-700 p-4 rounded-2xl aspect-[3/2] flex flex-col justify-center items-center text-center cursor-pointer shadow hover:shadow-lg transition";
+    div.className = `relative ${getCardColor(card.shop)} p-4 rounded-2xl aspect-[3/2] flex flex-col justify-center items-center text-center cursor-pointer shadow hover:shadow-lg transition`;
 
     const icon = document.createElement("div");
     icon.className = "text-4xl";
@@ -109,7 +117,7 @@ function renderCards() {
     title.textContent = card.shop;
 
     const del = document.createElement("button");
-    del.className = "absolute top-2 right-2 text-gray-500 hover:text-red-500 font-bold";
+    del.className = "absolute top-2 right-2 text-black/60 hover:text-red-500 font-bold";
     del.textContent = "🗑";
     del.onclick = (e) => {
       e.stopPropagation();
@@ -124,6 +132,7 @@ function renderCards() {
     grid.appendChild(div);
   });
 
+  // Tlačítko pro přidání
   const addBtn = document.createElement("div");
   addBtn.id = "add-card-btn";
   addBtn.className = "flex items-center justify-center border-2 border-dashed rounded-2xl aspect-[3/2] cursor-pointer bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition";
@@ -134,7 +143,7 @@ function renderCards() {
   grid.appendChild(addBtn);
 }
 
-// Mazání karty
+// Smazání karty
 function deleteCard(index) {
   const cards = JSON.parse(localStorage.getItem("cards") || "[]");
   cards.splice(index, 1);
@@ -142,15 +151,15 @@ function deleteCard(index) {
   renderCards();
 }
 
-// Zobrazení kódu jako QR
+// Zobrazení kódu
 function showBarcode(code) {
   const win = window.open("", "barcode", "width=400,height=400");
   win.document.write(`
     <html>
       <body style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;">
         <div style="text-align:center;">
-          <p style="margin-bottom: 1em; font-size: 1.2em;">${code}</p>
-          <img src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(code)}&size=200x200" alt="QR Code"/>
+          <p style="font-size: 1.2em; margin-bottom: 1em;">${code}</p>
+          <img src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(code)}&size=200x200" alt="QR Code" />
         </div>
       </body>
     </html>`);
