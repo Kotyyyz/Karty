@@ -81,6 +81,7 @@
         <button class="shop-option bg-yellow-500 text-black rounded-lg p-4 text-center font-bold" data-shop="Billa">🛑 Billa</button>
         <button class="shop-option bg-orange-600 text-white rounded-lg p-4 text-center font-bold" data-shop="Penny">🛠 Penny</button>
         <button class="shop-option bg-red-700 text-white rounded-lg p-4 text-center font-bold" data-shop="Biedronka">🐞 Biedronka</button>
+        <button class="shop-option bg-green-600 text-white rounded-lg p-4 text-center font-bold" data-shop="beYPc">⛽ beYPc</button>
         <button class="shop-option bg-green-400 text-white rounded-lg p-4 text-center font-bold" data-shop="Mountfield">🌱 Mountfield</button>
         <button class="shop-option bg-gray-700 text-white rounded-lg p-4 text-center font-bold" data-shop="Metro">🏬 Metro</button>
         <button class="shop-option bg-blue-400 text-white rounded-lg p-4 text-center font-bold" data-shop="Coop Jednota">🏠 Coop Jednota</button>
@@ -94,6 +95,12 @@
       <button id="scan-type-close" class="absolute top-2 right-2 text-gray-500 hover:text-red-500 close-btn">✕</button>
       <h2 class="text-xl font-semibold mb-4" data-i18n="select_code_type">Vyber typ kódu</h2>
       <button class="scan-type-btn bg-green-500 text-white p-2 rounded mb-2 w-full" data-type="qr" data-i18n="qr_code">QR kód</button>
+      <select id="barcode-type" class="w-full p-2 mb-2 border rounded bg-white dark:bg-gray-700 text-black dark:text-white">
+        <option value="auto" data-i18n="auto_detect">Automatická detekce</option>
+        <option value="ean" data-i18n="ean_13">EAN-13</option>
+        <option value="upc" data-i18n="upc_a">UPC-A</option>
+        <option value="code_128" data-i18n="code_128">Code 128</option>
+      </select>
       <button class="scan-type-btn bg-indigo-600 text-white p-2 rounded w-full" data-type="barcode" data-i18n="barcode">Čárový kód</button>
     </div>
   </div>

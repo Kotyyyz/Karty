@@ -1,5 +1,6 @@
 let selectedShop = null;
 let selectedScanType = "qr";
+let selectedBarcodeType = "auto"; // Nová proměnná pro typ čárového kódu
 let html5QrCode;
 let translations = {};
 
@@ -72,6 +73,10 @@ document.querySelectorAll(".shop-option").forEach(btn => {
   });
 });
 
+document.getElementById("barcode-type").addEventListener("change", (e) => {
+  selectedBarcodeType = e.target.value; // Ukládá vybraný typ čárového kódu
+});
+
 document.querySelectorAll(".scan-type-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     selectedScanType = btn.dataset.type;
@@ -118,6 +123,23 @@ function startScanner() {
     });
   } else {
     const barcodeDiv = document.getElementById("barcode-scanner");
+    let readers = [];
+    switch (selectedBarcodeType) {
+      case "ean":
+        readers = ["ean_reader"];
+        break;
+      case "upc":
+        readers = ["upc_reader"];
+        break;
+      case "code_128":
+        readers = ["code_128_reader"];
+        break;
+      case "auto":
+      default:
+        readers = ["code_128_reader", "ean_reader", "upc_reader"];
+        break;
+    }
+
     Quagga.init({
       inputStream: {
         name: "Live",
@@ -135,7 +157,7 @@ function startScanner() {
         halfSample: true
       },
       decoder: {
-        readers: ["code_128_reader", "ean_reader", "upc_reader"]
+        readers: readers // Dynamické nastavení čteček podle typu
       },
       locate: true
     }, err => {
@@ -144,7 +166,7 @@ function startScanner() {
         alert(translations['barcode_scanner_error'] || "Nepodařilo se spustit skener čárových kódů. Zkontroluj oprávnění kamery a konzoli.");
         return;
       }
-      console.log("Quagga inicializováno, spouštím stream...");
+      console.log("Quagga inicializováno, spouštím stream s čtečkami:", readers);
       Quagga.start();
       Quagga.onDetected(data => {
         if (data && data.codeResult && data.codeResult.code) {
@@ -179,13 +201,10 @@ function stopScanner() {
 
 // Clean code without removing trailing zeros for valid barcodes
 function cleanCode(code) {
-  // Trim only spaces, keep trailing zeros for EAN/UPC (12 or 13 digits)
   const trimmedCode = code.trim();
-  // Check if it's a valid EAN/UPC length
   if (/^\d{12,13}$/.test(trimmedCode)) {
-    return trimmedCode; // Return as is if it matches 12 or 13 digits
+    return trimmedCode;
   }
-  // For other formats, remove trailing zeros
   return trimmedCode.replace(/0+$/, '');
 }
 
@@ -216,11 +235,27 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
           document.getElementById("confirm-code").disabled = true;
         }
       } else {
+        let readers = [];
+        switch (selectedBarcodeType) {
+          case "ean":
+            readers = ["ean_reader"];
+            break;
+          case "upc":
+            readers = ["upc_reader"];
+            break;
+          case "code_128":
+            readers = ["code_128_reader"];
+            break;
+          case "auto":
+          default:
+            readers = ["code_128_reader", "ean_reader", "upc_reader"];
+            break;
+        }
         Quagga.decodeSingle({
           src: reader.result,
           numOfWorkers: 0,
           decoder: {
-            readers: ["code_128_reader", "ean_reader", "upc_reader"]
+            readers: readers
           },
           locate: true
         }, function (result) {
@@ -337,10 +372,10 @@ function showBarcode(code) {
   const img = document.getElementById("display-code-img");
   const text = document.getElementById("display-code-text");
   title.textContent = card.shop;
-  text.textContent = card.code; // Zobrazí vyčištěný kód
+  text.textContent = card.code;
   img.src = card.type === "qr" 
     ? `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(card.code)}&size=200x200`
-    : `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(card.code)}&code=Code128`;
+    : `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(card.code)}&code=${selectedBarcodeType === "code_128" ? "Code128" : selectedBarcodeType === "ean" ? "EAN13" : "UPC"}`;
   modal.classList.remove("hidden");
 }
 
