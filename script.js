@@ -64,47 +64,63 @@ function startScanner() {
   if (selectedScanType === "qr") {
     qrDiv.style.display = "block";
     barcodeDiv.style.display = "none";
+
     html5QrCode = new Html5Qrcode("qr-reader");
-    html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (decodedText) => {
-      html5QrCode.stop().then(() => {
-        saveCard(selectedShop, decodedText);
-        document.getElementById("scan-modal").classList.add("hidden");
-      });
-    });
+    html5QrCode.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: 250 },
+      decodedText => {
+        html5QrCode.stop().then(() => {
+          saveCard(selectedShop, decodedText);
+          document.getElementById("scan-modal").classList.add("hidden");
+        });
+      },
+      error => {
+        // optional: log or handle scan errors
+      }
+    );
   } else {
     qrDiv.style.display = "none";
     barcodeDiv.style.display = "block";
-    Quagga.init({
-      inputStream: {
-        name: "Live",
-        type: "LiveStream",
-        target: barcodeDiv,
+
+    Quagga.init(
+      {
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: barcodeDiv,
+        },
+        decoder: {
+          readers: ["ean_reader", "code_128_reader"]
+        }
       },
-      decoder: {
-        readers: ["ean_reader", "code_128_reader"]
+      err => {
+        if (!err) {
+          Quagga.start();
+          Quagga.onDetected(data => {
+            const code = data.codeResult.code;
+            Quagga.stop();
+            saveCard(selectedShop, code);
+            document.getElementById("scan-modal").classList.add("hidden");
+          });
+        }
       }
-    }, function (err) {
-      if (!err) {
-        Quagga.start();
-        Quagga.onDetected(data => {
-          const code = data.codeResult.code;
-          Quagga.stop();
-          saveCard(selectedShop, code);
-          document.getElementById("scan-modal").classList.add("hidden");
-        });
-      }
-    });
+    );
   }
 }
 
 function stopScanner() {
-  if (html5QrCode) html5QrCode.stop().catch(() => {});
-  if (Quagga) Quagga.stop();
+  if (html5QrCode) {
+    html5QrCode.stop().catch(() => {});
+  }
+  if (Quagga) {
+    Quagga.stop();
+  }
 }
 
 function saveCard(shop, code) {
   const cards = JSON.parse(localStorage.getItem("cards") || "[]");
-  cards.push({ shop, code, type: selectedScanType }); // přidáme typ
+  cards.push({ shop, code, type: selectedScanType });
   localStorage.setItem("cards", JSON.stringify(cards));
   renderCards();
 }
@@ -119,6 +135,7 @@ function deleteCard(index) {
 function renderCards() {
   const grid = document.getElementById("card-grid");
   grid.innerHTML = "";
+
   const cards = JSON.parse(localStorage.getItem("cards") || "[]");
   cards.forEach((card, index) => {
     const div = document.createElement("div");
@@ -139,6 +156,7 @@ function renderCards() {
     };
 
     div.onclick = () => showBarcode(card.code);
+
     grid.appendChild(div);
   });
 
@@ -189,5 +207,13 @@ function showBarcode(code) {
 
   modal.classList.remove("hidden");
 }
+
+// (Optional) Multijazyčná funkce připravená pro rozšíření
+document.getElementById("lang-select").addEventListener("change", (e) => {
+  const lang = e.target.value;
+  localStorage.setItem("preferredLanguage", lang);
+  // zde by se načetl překlad (např. přes JSON) a přepsaly by se texty v UI
+  // zatím není implementováno
+});
 
 renderCards();
