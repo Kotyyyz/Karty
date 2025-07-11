@@ -76,7 +76,10 @@ function startScanner() {
         });
       },
       error => {}
-    );
+    ).catch(err => {
+      console.error("Failed to start QR scanner:", err);
+      alert("Nepodařilo se spustit skener QR kódů. Zkontroluj oprávnění kamery.");
+    });
   } else {
     qrDiv.style.display = "none";
     barcodeDiv.style.display = "block";
@@ -93,15 +96,18 @@ function startScanner() {
         }
       },
       err => {
-        if (!err) {
-          Quagga.start();
-          Quagga.onDetected(data => {
-            const code = data.codeResult.code;
-            Quagga.stop();
-            saveCard(selectedShop, code);
-            document.getElementById("scan-modal").classList.add("hidden");
-          });
+        if (err) {
+          console.error("Failed to initialize Quagga:", err);
+          alert("Nepodařilo se spustit skener čárových kódů. Zkontroluj oprávnění kamery.");
+          return;
         }
+        Quagga.start();
+        Quagga.onDetected(data => {
+          const code = data.codeResult.code;
+          Quagga.stop();
+          saveCard(selectedShop, code);
+          document.getElementById("scan-modal").classList.add("hidden");
+        });
       }
     );
   }
@@ -110,8 +116,9 @@ function startScanner() {
 function stopScanner() {
   if (html5QrCode) {
     html5QrCode.stop().catch(() => {});
+    html5QrCode = null;
   }
-  if (Quagga) {
+  if (Quagga && Quagga.isRunning) {
     Quagga.stop();
   }
 }
@@ -130,14 +137,49 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
       const ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0);
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const code = jsQR(imageData.data, imageData.width, imageData.height);
 
-      if (code && code.data) {
-        stopScanner();
-        document.getElementById("manual-code").value = code.data;
-        document.getElementById("confirm-code").disabled = false;
+      if (selectedScanType === "qr") {
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        if (code && code.data) {
+          stopScanner();
+          document.getElementById("manual-code").value = code.data;
+          document.getElementById("confirm-code").disabled = false;
+        } else {
+          alert("QR kód nebyl rozpoznán. Zkontroluj kvalitu obrázku.");
+        }
       } else {
-        alert("QR kód nebyl rozpoznán. Zkontroluj kvalitu obrázku.");
+        Quagga.init(
+          {
+            inputStream: {
+              name: "Static",
+              type: "ImageStream",
+              target: canvas,
+            },
+            decoder: {
+              readers: ["ean_reader", "code_128_reader"]
+            }
+          },
+          err => {
+            if (err) {
+              console.error("Failed to initialize Quagga for image:", err);
+              alert("Nepodařilo se rozpoznat čárový kód. Zkontroluj kvalitu obrázku.");
+              return;
+            }
+            Quagga.start();
+            Quagga.onDetected(data => {
+              const code = data.codeResult.code;
+              Quagga.stop();
+              document.getElementById("manual-code").value = code;
+              document.getElementById("confirm-code").disabled = false;
+            });
+            Quagga.onProcessed(result => {
+              if (!result || !result.codeResult) {
+                Quagga.stop();
+                alert("Čárový kód nebyl rozpoznán. Zkontroluj kvalitu obrázku.");
+              }
+            });
+          }
+        );
       }
     };
     img.src = reader.result;
