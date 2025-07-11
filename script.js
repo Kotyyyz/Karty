@@ -147,7 +147,7 @@ function startScanner() {
         readers = ["code_128_reader"];
         break;
       default:
-        readers = ["ean_reader", "code_128_reader"]; // Fallback na oba podporované typy
+        readers = ["ean_reader", "code_128_reader"];
         break;
     }
 
@@ -288,7 +288,7 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
 function saveCard(shop, code) {
   const cleanedCode = cleanCode(code);
   const cards = JSON.parse(localStorage.getItem("cards") || "[]");
-  cards.push({ shop, code: cleanedCode, type: selectedScanType });
+  cards.push({ shop, code: cleanedCode, type: selectedScanType, barcodeType: selectedBarcodeType });
   localStorage.setItem("cards", JSON.stringify(cards));
   renderCards();
 }
@@ -320,7 +320,7 @@ function renderCards() {
       e.stopPropagation();
       deleteCard(index);
     };
-    div.onclick = () => showBarcode(card.code);
+    div.onclick = () => showBarcode(card.code, card.barcodeType);
     grid.appendChild(div);
   });
   const add = document.createElement("div");
@@ -341,7 +341,6 @@ function getIcon(shop) {
     case "Billa": return "🛑";
     case "Penny": return "🛠";
     case "Biedronka": return "🐞";
-    case "beYPc": return "⛽";
     case "Mountfield": return "🌱";
     case "Metro": return "🏬";
     case "Coop Jednota": return "🏠";
@@ -360,7 +359,6 @@ function getCardColor(shop) {
     case "Billa": return "bg-yellow-500 text-black";
     case "Penny": return "bg-orange-600 text-white";
     case "Biedronka": return "bg-red-700 text-white";
-    case "beYPc": return "bg-green-600 text-white";
     case "Mountfield": return "bg-green-400 text-white";
     case "Metro": return "bg-gray-700 text-white";
     case "Coop Jednota": return "bg-blue-400 text-white";
@@ -370,7 +368,7 @@ function getCardColor(shop) {
 }
 
 // Show barcode or QR code
-function showBarcode(code) {
+function showBarcode(code, barcodeType) {
   const cards = JSON.parse(localStorage.getItem("cards") || "[]");
   const card = cards.find(c => c.code === code);
   if (!card) return;
@@ -382,7 +380,7 @@ function showBarcode(code) {
   text.textContent = card.code;
   img.src = card.type === "qr" 
     ? `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(card.code)}&size=200x200`
-    : `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(card.code)}&code=${selectedBarcodeType === "code_128" ? "Code128" : "EAN13"}`;
+    : `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(card.code)}&code=${barcodeType === "code_128" ? "Code128" : "EAN13"}`;
   modal.classList.remove("hidden");
 }
 
