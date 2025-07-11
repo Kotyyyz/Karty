@@ -170,23 +170,45 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
 
   const reader = new FileReader();
   reader.onload = function () {
-    Quagga.decodeSingle({
-      decoder: {
-        readers: ["ean_reader", "code_128_reader", "code_39_reader", "code_93_reader", "upc_reader", "upc_e_reader"]
-      },
-      locate: true,
-      src: reader.result
-    }, function (result) {
-      if (result && result.codeResult) {
-        const code = cleanCode(result.codeResult.code);
-        stopScanner();
-        document.getElementById("manual-code").value = code;
-        document.getElementById("confirm-code").disabled = false;
+    const img = new Image();
+    img.onload = function () {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+      if (selectedScanType === "qr") {
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        if (code && code.data) {
+          stopScanner();
+          document.getElementById("manual-code").value = code.data;
+          document.getElementById("confirm-code").disabled = false;
+        } else {
+          alert(translations['qr_not_recognized'] || "QR kód nebyl rozpoznán. Zkontroluj kvalitu obrázku.");
+        }
       } else {
-        alert(translations['barcode_not_recognized'] || "Čárový kód nebyl rozpoznán. Zkontroluj kvalitu obrázku a formát.");
-        console.log("Quagga decode result:", result);
+        Quagga.decodeSingle({
+          decoder: {
+            readers: ["ean_reader", "code_128_reader", "code_39_reader", "code_93_reader", "upc_reader", "upc_e_reader"]
+          },
+          locate: true,
+          src: reader.result
+        }, function (result) {
+          if (result && result.codeResult) {
+            const code = cleanCode(result.codeResult.code);
+            stopScanner();
+            document.getElementById("manual-code").value = code;
+            document.getElementById("confirm-code").disabled = false;
+          } else {
+            alert(translations['barcode_not_recognized'] || "Čárový kód nebyl rozpoznán. Zkontroluj kvalitu obrázku a formát.");
+            console.log("Quagga decode result:", result);
+          }
+        });
       }
-    });
+    };
+    img.src = reader.result;
   };
   reader.readAsDataURL(file);
 });
@@ -250,7 +272,7 @@ function getIcon(shop) {
     case "Billa": return "🛑";
     case "Penny": return "🛠";
     case "Biedronka": return "🐞";
-    case "beYPc": return "⛽"; // Přidán beYPc
+    case "beYPc": return "⛽";
     default: return "📦";
   }
 }
@@ -264,7 +286,7 @@ function getCardColor(shop) {
     case "Billa": return "bg-yellow-500 text-black";
     case "Penny": return "bg-orange-600 text-white";
     case "Biedronka": return "bg-red-700 text-white";
-    case "beYPc": return "bg-green-600 text-white"; // Přidán beYPc
+    case "beYPc": return "bg-green-600 text-white";
     default: return "bg-gray-200 text-black";
   }
 }
