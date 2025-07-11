@@ -11,34 +11,39 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <style>
-    #qr-reader, #barcode-reader {
+    #qr-scanner, #barcode-scanner {
       width: 100%;
       height: 300px;
       position: relative;
       overflow: hidden;
-      border: 2px solid #4a5568;
       border-radius: 8px;
       display: none;
     }
-    #qr-reader.qr-active .qrbox {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 250px;
-      height: 250px;
-      border: 2px solid #48bb78;
-      box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.5);
+    #qr-scanner.active-scanner {
+      border: 3px solid #48bb78; /* Zelený rámeček pro QR */
+      background-color: rgba(72, 187, 120, 0.1);
     }
-    #barcode-reader.barcode-active .barcodebox {
+    #barcode-scanner.active-scanner {
+      border: 3px solid #f56565; /* Červený rámeček pro barcode */
+      background-color: rgba(245, 101, 101, 0.1);
+    }
+    .active-scanner::before {
+      content: attr(data-label);
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 250px;
-      height: 100px;
-      border: 2px solid #f56565;
-      box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.5);
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-size: 16px;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    #qr-scanner.active-scanner::before {
+      background-color: #48bb78;
+      content: "QR Scanner";
+    }
+    #barcode-scanner.active-scanner::before {
+      background-color: #f56565;
+      content: "Barcode Scanner";
     }
     .close-btn {
       font-size: 24px; /* Zvětšení křížků */
@@ -100,8 +105,8 @@
     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl max-w-md w-full relative">
       <button id="scan-close" class="absolute top-2 right-2 text-gray-500 hover:text-red-500 close-btn">✕</button>
       <h2 class="text-xl font-semibold mb-4 text-center" data-i18n="scan_or_manual">Načti kód nebo zadej ručně</h2>
-      <div id="qr-reader" class="mb-4"></div>
-      <div id="barcode-reader" class="mb-4"></div>
+      <div id="qr-scanner" class="mb-4" data-label="QR Scanner"></div>
+      <div id="barcode-scanner" class="mb-4" data-label="Barcode Scanner"></div>
       <input type="file" id="image-upload" accept="image/*" class="mb-2 w-full p-2 border rounded" />
       <input type="text" id="manual-code" placeholder="Zadej číslo ručně" class="w-full p-2 border rounded mb-4" data-i18n-placeholder="manual_code_placeholder"/>
       <button id="confirm-code" disabled class="w-full bg-green-600 text-white p-2 rounded font-bold" data-i18n="confirm">Potvrdit</button>

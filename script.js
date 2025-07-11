@@ -34,18 +34,18 @@ function applyTranslations() {
 
 // Funkce pro aktualizaci zobrazení skeneru
 function updateScannerDisplay() {
-  const qrDiv = document.getElementById("qr-reader");
-  const barcodeDiv = document.getElementById("barcode-reader");
+  const qrDiv = document.getElementById("qr-scanner");
+  const barcodeDiv = document.getElementById("barcode-scanner");
   if (selectedScanType === "qr") {
-    qrDiv.classList.add("qr-active");
-    barcodeDiv.classList.remove("barcode-active");
     qrDiv.style.display = "block";
     barcodeDiv.style.display = "none";
+    qrDiv.classList.add("active-scanner");
+    barcodeDiv.classList.remove("active-scanner");
   } else {
-    qrDiv.classList.remove("qr-active");
-    barcodeDiv.classList.add("barcode-active");
     qrDiv.style.display = "none";
     barcodeDiv.style.display = "block";
+    qrDiv.classList.remove("active-scanner");
+    barcodeDiv.classList.add("active-scanner");
   }
 }
 
@@ -104,8 +104,8 @@ document.getElementById("confirm-code").addEventListener("click", () => {
 });
 
 function startScanner() {
-  const qrDiv = document.getElementById("qr-reader");
-  const barcodeDiv = document.getElementById("barcode-reader");
+  const qrDiv = document.getElementById("qr-scanner");
+  const barcodeDiv = document.getElementById("barcode-scanner");
   qrDiv.innerHTML = "";
   barcodeDiv.innerHTML = "";
 
@@ -113,15 +113,17 @@ function startScanner() {
     qrDiv.style.display = "block";
     barcodeDiv.style.display = "none";
 
-    html5QrCode = new Html5Qrcode("qr-reader");
+    html5QrCode = new Html5Qrcode("qr-scanner");
     html5QrCode.start(
       { facingMode: "environment" },
       { fps: 10, qrbox: 250 },
       decodedText => {
-        html5QrCode.stop().then(() => {
-          saveCard(selectedShop, decodedText);
-          document.getElementById("scan-modal").classList.add("hidden");
-        }).catch(err => console.error("Stop QR scanner error:", err));
+        if (decodedText && decodedText.length > 0) { // Zkontroluj kvalitu detekce
+          html5QrCode.stop().then(() => {
+            saveCard(selectedShop, decodedText);
+            document.getElementById("scan-modal").classList.add("hidden");
+          }).catch(err => console.error("Stop QR scanner error:", err));
+        }
       },
       error => {
         console.error("QR scan error:", error);
@@ -146,8 +148,8 @@ function startScanner() {
         }
       },
       locator: {
-        patchSize: "medium",
-        halfSample: true
+        patchSize: "large", // Snížena citlivost
+        halfSample: false
       },
       decoder: {
         readers: ["ean_reader", "code_128_reader", "code_39_reader", "code_93_reader", "upc_reader", "upc_e_reader", "i2of5_reader"]
@@ -162,9 +164,11 @@ function startScanner() {
       Quagga.start();
       Quagga.onDetected(data => {
         const code = cleanCode(data.codeResult.code);
-        Quagga.stop();
-        saveCard(selectedShop, code);
-        document.getElementById("scan-modal").classList.add("hidden");
+        if (code && code.length > 6 && data.codeResult.decoded.length > 0) { // Filtrování náhodných detekcí
+          Quagga.stop();
+          saveCard(selectedShop, code);
+          document.getElementById("scan-modal").classList.add("hidden");
+        }
       });
     });
   }
