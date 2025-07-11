@@ -1,7 +1,17 @@
 {
+  "title": "My Cards",
+  "add_card": "+",
+  "select_store": "Select Store",
   "select_code_type": "Select Code Type",
   "qr_code": "QR Code",
   "barcode": "Barcode",
+  "scan_or_manual": "Scan or Enter Code Manually",
+  "confirm": "Confirm",
+  "manual_code_placeholder": "Enter number manually",
+  "qr_scanner_error": "Failed to start QR code scanner.",
+  "barcode_scanner_error": "Failed to start barcode scanner. Check camera permissions and console.",
+  "qr_not_recognized": "QR code was not recognized.",
+  "barcode_not_recognized": "Barcode was not recognized.",
   "select_barcode_type": "Select Barcode Type",
   "ean_13": "EAN-13",
   "code_128": "Code 128"
