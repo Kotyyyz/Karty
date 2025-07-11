@@ -8,11 +8,15 @@ let translations = {};
 async function loadTranslations(lang) {
   try {
     const response = await fetch(`./${lang}.json`);
+    if (!response.ok) throw new Error(`File ${lang}.json not found`);
     translations = await response.json();
+    console.log(`Translations loaded for ${lang}:`, translations);
     applyTranslations();
   } catch (error) {
     console.error(`Nepodařilo se načíst překlady pro jazyk ${lang}:`, error);
-    alert(`Nepodařilo se načíst překlady pro jazyk ${lang}.`);
+    alert(`Nepodařilo se načíst překlady pro jazyk ${lang}. Ujistěte se, že soubor ${lang}.json existuje.`);
+    translations = {}; // Nastaví prázdný objekt jako zálohu
+    applyTranslations();
   }
 }
 
@@ -348,6 +352,7 @@ function getIcon(shop) {
     case "Billa": return "🛑";
     case "Penny": return "🛠";
     case "Biedronka": return "🐞";
+    case "beYPc": return "⛽";
     case "Mountfield": return "🌱";
     case "Metro": return "🏬";
     case "Coop Jednota": return "🏠";
@@ -366,6 +371,7 @@ function getCardColor(shop) {
     case "Billa": return "bg-yellow-500 text-black";
     case "Penny": return "bg-orange-600 text-white";
     case "Biedronka": return "bg-red-700 text-white";
+    case "beYPc": return "bg-green-600 text-white";
     case "Mountfield": return "bg-green-400 text-white";
     case "Metro": return "bg-gray-700 text-white";
     case "Coop Jednota": return "bg-blue-400 text-white";
@@ -402,5 +408,7 @@ document.addEventListener("DOMContentLoaded", () => {
 document.getElementById("lang-select").addEventListener("change", (e) => {
   const lang = e.target.value;
   localStorage.setItem("preferredLanguage", lang);
-  loadTranslations(lang);
+  loadTranslations(lang).then(() => {
+    console.log(`Language changed to ${lang}`);
+  });
 });
