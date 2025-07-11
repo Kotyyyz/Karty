@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title data-i18n="title">Moje Karty</title>
-
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
@@ -20,11 +19,11 @@
       display: none;
     }
     #qr-scanner.active-scanner {
-      border: 3px solid #48bb78; /* Zelený rámeček pro QR */
+      border: 3px solid #48bb78;
       background-color: rgba(72, 187, 120, 0.1);
     }
     #barcode-scanner.active-scanner {
-      border: 3px solid #f56565; /* Červený rámeček pro barcode */
+      border: 3px solid #f56565;
       background-color: rgba(245, 101, 101, 0.1);
     }
     .active-scanner::before {
@@ -46,12 +45,11 @@
       content: "Barcode Scanner";
     }
     .close-btn {
-      font-size: 24px; /* Zvětšení křížků */
+      font-size: 24px;
     }
   </style>
 </head>
 <body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white min-h-screen transition-colors duration-300">
-
   <!-- Hlavička -->
   <header class="flex justify-between items-center p-4 border-b dark:border-gray-700">
     <div class="flex gap-2">
@@ -64,14 +62,12 @@
     </div>
     <h1 class="text-xl font-bold" data-i18n="title">Moje Karty</h1>
   </header>
-
   <!-- Grid karet -->
   <main id="card-grid" class="grid grid-cols-2 gap-4 p-4">
     <div id="add-card-btn" class="flex items-center justify-center border-2 border-dashed rounded-2xl aspect-[3/2] cursor-pointer bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition">
       <div class="text-4xl text-gray-400" data-i18n="add_card">+</div>
     </div>
   </main>
-
   <!-- Výběr obchodů -->
   <div id="shop-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl max-w-sm w-full relative">
@@ -89,7 +85,6 @@
       </div>
     </div>
   </div>
-
   <!-- Výběr typu skenu -->
   <div id="scan-type-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl max-w-sm w-full relative text-center">
@@ -99,7 +94,6 @@
       <button class="scan-type-btn bg-indigo-600 text-white p-2 rounded w-full" data-type="barcode" data-i18n="barcode">Čárový kód</button>
     </div>
   </div>
-
   <!-- Skenování -->
   <div id="scan-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl max-w-md w-full relative">
@@ -112,7 +106,6 @@
       <button id="confirm-code" disabled class="w-full bg-green-600 text-white p-2 rounded font-bold" data-i18n="confirm">Potvrdit</button>
     </div>
   </div>
-
   <!-- Modal pro zobrazení kódu -->
   <div id="display-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl w-80 max-w-full relative text-center">
@@ -122,7 +115,6 @@
       <p id="display-code-text" class="font-mono text-lg break-all"></p>
     </div>
   </div>
-
   <!-- Script -->
   <script src="script.js"></script>
 </body>

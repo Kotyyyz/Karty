@@ -1,9 +1,9 @@
 let selectedShop = null;
-let selectedScanType = "qr"; // Default value
+let selectedScanType = "qr";
 let html5QrCode;
 let translations = {};
 
-// Funkce pro načtení překladů z JSON
+// Load translations from JSON
 async function loadTranslations(lang) {
   try {
     const response = await fetch(`./${lang}.json`);
@@ -15,66 +15,54 @@ async function loadTranslations(lang) {
   }
 }
 
-// Funkce pro aplikaci překladů na DOM
+// Apply translations to DOM
 function applyTranslations() {
   document.querySelectorAll('[data-i18n]').forEach(element => {
     const key = element.getAttribute('data-i18n');
-    if (translations[key]) {
-      element.textContent = translations[key];
-    }
+    if (translations[key]) element.textContent = translations[key];
   });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
     const key = element.getAttribute('data-i18n-placeholder');
-    if (translations[key]) {
-      element.placeholder = translations[key];
-    }
+    if (translations[key]) element.placeholder = translations[key];
   });
   document.title = translations['title'] || 'Moje Karty';
 }
 
-// Funkce pro aktualizaci zobrazení skeneru
+// Update scanner display based on type
 function updateScannerDisplay() {
   const qrDiv = document.getElementById("qr-scanner");
   const barcodeDiv = document.getElementById("barcode-scanner");
-  if (selectedScanType === "qr") {
-    qrDiv.style.display = "block";
-    barcodeDiv.style.display = "none";
-    qrDiv.classList.add("active-scanner");
-    barcodeDiv.classList.remove("active-scanner");
-  } else {
-    qrDiv.style.display = "none";
-    barcodeDiv.style.display = "block";
-    qrDiv.classList.remove("active-scanner");
-    barcodeDiv.classList.add("active-scanner");
-  }
+  qrDiv.style.display = selectedScanType === "qr" ? "block" : "none";
+  barcodeDiv.style.display = selectedScanType === "barcode" ? "block" : "none";
+  qrDiv.classList.toggle("active-scanner", selectedScanType === "qr");
+  barcodeDiv.classList.toggle("active-scanner", selectedScanType === "barcode");
 }
 
-const themeToggle = document.getElementById("theme-toggle");
-themeToggle.addEventListener("click", () => {
+// Event listeners
+document.getElementById("theme-toggle").addEventListener("click", () => {
   document.documentElement.classList.toggle("dark");
 });
 
-const addCardBtn = document.getElementById("add-card-btn");
-addCardBtn.addEventListener("click", () => {
+document.getElementById("add-card-btn").addEventListener("click", () => {
   document.getElementById("shop-modal").classList.remove("hidden");
 });
 
-document.getElementById("modal-close").onclick = () => {
+document.getElementById("modal-close").addEventListener("click", () => {
   document.getElementById("shop-modal").classList.add("hidden");
-};
+});
 
-document.getElementById("scan-type-close").onclick = () => {
+document.getElementById("scan-type-close").addEventListener("click", () => {
   document.getElementById("scan-type-modal").classList.add("hidden");
-};
+});
 
-document.getElementById("scan-close").onclick = () => {
+document.getElementById("scan-close").addEventListener("click", () => {
   stopScanner();
   document.getElementById("scan-modal").classList.add("hidden");
-};
+});
 
-document.getElementById("display-close").onclick = () => {
+document.getElementById("display-close").addEventListener("click", () => {
   document.getElementById("display-modal").classList.add("hidden");
-};
+});
 
 document.querySelectorAll(".shop-option").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -103,6 +91,7 @@ document.getElementById("confirm-code").addEventListener("click", () => {
   }
 });
 
+// Start scanner based on type
 function startScanner() {
   const qrDiv = document.getElementById("qr-scanner");
   const barcodeDiv = document.getElementById("barcode-scanner");
@@ -110,61 +99,45 @@ function startScanner() {
   barcodeDiv.innerHTML = "";
 
   if (selectedScanType === "qr") {
-    qrDiv.style.display = "block";
-    barcodeDiv.style.display = "none";
-
     html5QrCode = new Html5Qrcode("qr-scanner");
     html5QrCode.start(
       { facingMode: "environment" },
-      { fps: 10, qrbox: 250 },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
       decodedText => {
-        if (decodedText && decodedText.length > 0) { // Zkontroluj kvalitu detekce
+        if (decodedText) {
           html5QrCode.stop().then(() => {
             saveCard(selectedShop, decodedText);
             document.getElementById("scan-modal").classList.add("hidden");
           }).catch(err => console.error("Stop QR scanner error:", err));
         }
       },
-      error => {
-        console.error("QR scan error:", error);
-      }
+      error => console.error("QR scan error:", error)
     ).catch(err => {
       console.error("Failed to start QR scanner:", err);
-      alert(translations['qr_scanner_error'] || "Nepodařilo se spustit skener QR kódů. Zkontroluj oprávnění kamery.");
+      alert(translations['qr_scanner_error'] || "Nepodařilo se spustit skener QR kódů.");
     });
   } else {
-    qrDiv.style.display = "none";
-    barcodeDiv.style.display = "block";
-
     Quagga.init({
       inputStream: {
         name: "Live",
         type: "LiveStream",
         target: barcodeDiv,
-        constraints: {
-          facingMode: "environment",
-          width: 1280,
-          height: 720
-        }
-      },
-      locator: {
-        patchSize: "large", // Snížena citlivost
-        halfSample: false
+        constraints: { facingMode: "environment", width: 640, height: 480 }
       },
       decoder: {
-        readers: ["ean_reader", "code_128_reader", "code_39_reader", "code_93_reader", "upc_reader", "upc_e_reader", "i2of5_reader"]
+        readers: ["ean_reader", "code_128_reader", "code_39_reader", "upc_reader"]
       },
       locate: true
     }, err => {
       if (err) {
         console.error("Failed to initialize Quagga:", err);
-        alert(translations['barcode_scanner_error'] || "Nepodařilo se spustit skener čárových kódů. Zkontroluj oprávnění kamery.");
+        alert(translations['barcode_scanner_error'] || "Nepodařilo se spustit skener čárových kódů.");
         return;
       }
       Quagga.start();
       Quagga.onDetected(data => {
         const code = cleanCode(data.codeResult.code);
-        if (code && code.length > 6 && data.codeResult.decoded.length > 0) { // Filtrování náhodných detekcí
+        if (code && code.length > 6) {
           Quagga.stop();
           saveCard(selectedShop, code);
           document.getElementById("scan-modal").classList.add("hidden");
@@ -174,6 +147,7 @@ function startScanner() {
   }
 }
 
+// Stop scanners
 function stopScanner() {
   if (html5QrCode) {
     html5QrCode.stop().catch(() => {});
@@ -184,10 +158,12 @@ function stopScanner() {
   }
 }
 
+// Clean code by trimming trailing zeros
 function cleanCode(code) {
   return code.trim().replace(/0+$/, '');
 }
 
+// Handle image upload
 document.getElementById("image-upload").addEventListener("change", function (e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -210,16 +186,17 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
           document.getElementById("manual-code").value = code.data;
           document.getElementById("confirm-code").disabled = false;
         } else {
-          alert(translations['qr_not_recognized'] || "QR kód nebyl rozpoznán. Zkontroluj kvalitu obrázku.");
+          alert(translations['qr_not_recognized'] || "QR kód nebyl rozpoznán.");
           document.getElementById("confirm-code").disabled = true;
         }
       } else {
         Quagga.decodeSingle({
+          src: reader.result,
+          numOfWorkers: 0, // Run in main thread to avoid worker issues
           decoder: {
-            readers: ["ean_reader", "code_128_reader", "code_39_reader", "code_93_reader", "upc_reader", "upc_e_reader", "i2of5_reader"]
+            readers: ["ean_reader", "code_128_reader", "code_39_reader", "upc_reader"]
           },
-          locate: true,
-          src: reader.result
+          locate: true
         }, function (result) {
           if (result && result.codeResult) {
             const code = cleanCode(result.codeResult.code);
@@ -227,15 +204,9 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
             document.getElementById("manual-code").value = code;
             document.getElementById("confirm-code").disabled = false;
           } else {
-            alert(translations['barcode_not_recognized'] || "Čárový kód nebyl rozpoznán. Zkontroluj kvalitu obrázku a formát.");
+            alert(translations['barcode_not_recognized'] || "Čárový kód nebyl rozpoznán.");
             document.getElementById("confirm-code").disabled = true;
-            console.log("Quagga decode result:", result);
           }
-        }).catch(err => {
-          console.error("Quagga decode error:", err);
-          alert("Chyba při zpracování obrázku. Zkuste jiný formát nebo obnovte stránku.");
-          stopScanner();
-          document.getElementById("scan-modal").classList.add("hidden");
         });
       }
     };
@@ -244,6 +215,7 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
   reader.readAsDataURL(file);
 });
 
+// Save card to localStorage
 function saveCard(shop, code) {
   const cleanedCode = cleanCode(code);
   const cards = JSON.parse(localStorage.getItem("cards") || "[]");
@@ -252,6 +224,7 @@ function saveCard(shop, code) {
   renderCards();
 }
 
+// Delete card
 function deleteCard(index) {
   const cards = JSON.parse(localStorage.getItem("cards") || "[]");
   cards.splice(index, 1);
@@ -259,33 +232,28 @@ function deleteCard(index) {
   renderCards();
 }
 
+// Render cards
 function renderCards() {
   const grid = document.getElementById("card-grid");
   grid.innerHTML = "";
-
   const cards = JSON.parse(localStorage.getItem("cards") || "[]");
   cards.forEach((card, index) => {
     const div = document.createElement("div");
     const bg = getCardColor(card.shop);
     const isDark = bg.includes("text-white");
-
     div.className = `relative ${bg} p-4 rounded-2xl aspect-[3/2] flex flex-col justify-center items-center text-center cursor-pointer shadow hover:shadow-lg transition ${isDark ? '' : 'text-black'}`;
     div.innerHTML = `
       <div class="text-4xl">${getIcon(card.shop)}</div>
       <div class="text-lg font-semibold mt-2">${card.shop}</div>
       <button class="absolute top-2 right-2 ${isDark ? 'text-white/70' : 'text-black/60'} hover:text-red-500">🗑</button>
     `;
-
     div.querySelector("button").onclick = (e) => {
       e.stopPropagation();
       deleteCard(index);
     };
-
     div.onclick = () => showBarcode(card.code);
-
     grid.appendChild(div);
   });
-
   const add = document.createElement("div");
   add.id = "add-card-btn";
   add.className = "flex items-center justify-center border-2 border-dashed rounded-2xl aspect-[3/2] cursor-pointer bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition";
@@ -294,6 +262,7 @@ function renderCards() {
   grid.appendChild(add);
 }
 
+// Get shop icon
 function getIcon(shop) {
   switch (shop) {
     case "Lidl": return "🛒";
@@ -308,6 +277,7 @@ function getIcon(shop) {
   }
 }
 
+// Get card color
 function getCardColor(shop) {
   switch (shop) {
     case "Lidl": return "bg-yellow-300 text-black";
@@ -322,34 +292,29 @@ function getCardColor(shop) {
   }
 }
 
+// Show barcode or QR code
 function showBarcode(code) {
   const cards = JSON.parse(localStorage.getItem("cards") || "[]");
   const card = cards.find(c => c.code === code);
   if (!card) return;
-
   const modal = document.getElementById("display-modal");
   const title = document.getElementById("display-title");
   const img = document.getElementById("display-code-img");
   const text = document.getElementById("display-code-text");
-
   title.textContent = card.shop;
   text.textContent = card.code;
-
-  if (card.type === "qr") {
-    img.src = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(card.code)}&size=200x200`;
-  } else {
-    img.src = `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(card.code)}&code=Code128&multiplebarcodes=false`;
-  }
-
+  img.src = card.type === "qr" 
+    ? `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(card.code)}&size=200x200`
+    : `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(card.code)}&code=Code128`;
   modal.classList.remove("hidden");
 }
 
-// Inicializace jazyka a skeneru při načtení stránky
+// Initialize
 document.addEventListener("DOMContentLoaded", () => {
   const savedLang = localStorage.getItem("preferredLanguage") || "cs";
   document.getElementById("lang-select").value = savedLang;
   loadTranslations(savedLang);
-  updateScannerDisplay();
+  renderCards();
 });
 
 document.getElementById("lang-select").addEventListener("change", (e) => {
@@ -357,5 +322,3 @@ document.getElementById("lang-select").addEventListener("change", (e) => {
   localStorage.setItem("preferredLanguage", lang);
   loadTranslations(lang);
 });
-
-renderCards();
