@@ -18,7 +18,7 @@
       overflow: hidden;
       border: 2px solid #4a5568;
       border-radius: 8px;
-      display: none; /* Skryto defaultně, zobrazí se podle selectedScanType */
+      display: none;
     }
     #qr-reader.qr-active .qrbox {
       position: absolute;
@@ -27,7 +27,7 @@
       transform: translate(-50%, -50%);
       width: 250px;
       height: 250px;
-      border: 2px solid #48bb78; /* Zelený rámeček pro QR */
+      border: 2px solid #48bb78;
       box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.5);
     }
     #barcode-reader.barcode-active .barcodebox {
@@ -36,9 +36,12 @@
       left: 50%;
       transform: translate(-50%, -50%);
       width: 250px;
-      height: 100px; /* Menší výška pro čárové kódy */
-      border: 2px solid #f56565; /* Červený rámeček pro barcode */
+      height: 100px;
+      border: 2px solid #f56565;
       box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.5);
+    }
+    .close-btn {
+      font-size: 24px; /* Zvětšení křížků */
     }
   </style>
 </head>
@@ -67,7 +70,7 @@
   <!-- Výběr obchodů -->
   <div id="shop-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl max-w-sm w-full relative">
-      <button id="modal-close" class="absolute top-2 right-2 text-gray-500 hover:text-red-500">✕</button>
+      <button id="modal-close" class="absolute top-2 right-2 text-gray-500 hover:text-red-500 close-btn">✕</button>
       <h2 class="text-xl font-semibold mb-4 text-center" data-i18n="select_store">Vyber obchod</h2>
       <div class="grid grid-cols-1 gap-4 max-h-[400px] overflow-y-auto">
         <button class="shop-option bg-yellow-400 text-black rounded-lg p-4 text-center font-bold" data-shop="Lidl">🛒 Lidl</button>
@@ -85,7 +88,7 @@
   <!-- Výběr typu skenu -->
   <div id="scan-type-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl max-w-sm w-full relative text-center">
-      <button id="scan-type-close" class="absolute top-2 right-2 text-gray-500 hover:text-red-500">✕</button>
+      <button id="scan-type-close" class="absolute top-2 right-2 text-gray-500 hover:text-red-500 close-btn">✕</button>
       <h2 class="text-xl font-semibold mb-4" data-i18n="select_code_type">Vyber typ kódu</h2>
       <button class="scan-type-btn bg-green-500 text-white p-2 rounded mb-2 w-full" data-type="qr" data-i18n="qr_code">QR kód</button>
       <button class="scan-type-btn bg-indigo-600 text-white p-2 rounded w-full" data-type="barcode" data-i18n="barcode">Čárový kód</button>
@@ -95,7 +98,7 @@
   <!-- Skenování -->
   <div id="scan-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl max-w-md w-full relative">
-      <button id="scan-close" class="absolute top-2 right-2 text-gray-500 hover:text-red-500">✕</button>
+      <button id="scan-close" class="absolute top-2 right-2 text-gray-500 hover:text-red-500 close-btn">✕</button>
       <h2 class="text-xl font-semibold mb-4 text-center" data-i18n="scan_or_manual">Načti kód nebo zadej ručně</h2>
       <div id="qr-reader" class="mb-4"></div>
       <div id="barcode-reader" class="mb-4"></div>
@@ -108,7 +111,7 @@
   <!-- Modal pro zobrazení kódu -->
   <div id="display-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl w-80 max-w-full relative text-center">
-      <button id="display-close" class="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-xl">✕</button>
+      <button id="display-close" class="absolute top-2 right-2 text-gray-500 hover:text-red-500 close-btn text-xl">✕</button>
       <h2 id="display-title" class="text-xl font-bold mb-4"></h2>
       <img id="display-code-img" src="" alt="code" class="mx-auto mb-2" />
       <p id="display-code-text" class="font-mono text-lg break-all"></p>

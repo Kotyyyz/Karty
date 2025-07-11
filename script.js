@@ -1,5 +1,5 @@
 let selectedShop = null;
-let selectedScanType = "qr"; // Ensure default value is set
+let selectedScanType = "qr"; // Default value
 let html5QrCode;
 let translations = {};
 
@@ -89,7 +89,7 @@ document.querySelectorAll(".scan-type-btn").forEach(btn => {
     selectedScanType = btn.dataset.type;
     document.getElementById("scan-type-modal").classList.add("hidden");
     document.getElementById("scan-modal").classList.remove("hidden");
-    updateScannerDisplay(); // Update display before starting scanner
+    updateScannerDisplay();
     startScanner();
   });
 });
@@ -121,7 +121,7 @@ function startScanner() {
         html5QrCode.stop().then(() => {
           saveCard(selectedShop, decodedText);
           document.getElementById("scan-modal").classList.add("hidden");
-        });
+        }).catch(err => console.error("Stop QR scanner error:", err));
       },
       error => {
         console.error("QR scan error:", error);
@@ -140,7 +140,9 @@ function startScanner() {
         type: "LiveStream",
         target: barcodeDiv,
         constraints: {
-          facingMode: "environment"
+          facingMode: "environment",
+          width: 1280,
+          height: 720
         }
       },
       locator: {
@@ -148,7 +150,7 @@ function startScanner() {
         halfSample: true
       },
       decoder: {
-        readers: ["ean_reader", "code_128_reader", "code_39_reader", "code_93_reader", "upc_reader", "upc_e_reader"]
+        readers: ["ean_reader", "code_128_reader", "code_39_reader", "code_93_reader", "upc_reader", "upc_e_reader", "i2of5_reader"]
       },
       locate: true
     }, err => {
@@ -210,7 +212,7 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
       } else {
         Quagga.decodeSingle({
           decoder: {
-            readers: ["ean_reader", "code_128_reader", "code_39_reader", "code_93_reader", "upc_reader", "upc_e_reader"]
+            readers: ["ean_reader", "code_128_reader", "code_39_reader", "code_93_reader", "upc_reader", "upc_e_reader", "i2of5_reader"]
           },
           locate: true,
           src: reader.result
@@ -225,6 +227,11 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
             document.getElementById("confirm-code").disabled = true;
             console.log("Quagga decode result:", result);
           }
+        }).catch(err => {
+          console.error("Quagga decode error:", err);
+          alert("Chyba při zpracování obrázku. Zkuste jiný formát nebo obnovte stránku.");
+          stopScanner();
+          document.getElementById("scan-modal").classList.add("hidden");
         });
       }
     };
@@ -338,7 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const savedLang = localStorage.getItem("preferredLanguage") || "cs";
   document.getElementById("lang-select").value = savedLang;
   loadTranslations(savedLang);
-  updateScannerDisplay(); // Initialize display with default selectedScanType
+  updateScannerDisplay();
 });
 
 document.getElementById("lang-select").addEventListener("change", (e) => {
