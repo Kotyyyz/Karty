@@ -117,31 +117,34 @@ function startScanner() {
       alert(translations['qr_scanner_error'] || "Nepodařilo se spustit skener QR kódů.");
     });
   } else {
+    const barcodeDiv = document.getElementById("barcode-scanner");
     Quagga.init({
       inputStream: {
         name: "Live",
         type: "LiveStream",
         target: barcodeDiv,
-        constraints: { 
-          facingMode: "environment", 
-          width: 320, 
-          height: 240 
+        constraints: {
+          facingMode: { exact: "environment" }, // Přesnější nastavení kamery
+          width: { min: 320 },
+          height: { min: 240 }
         }
       },
       decoder: {
-        readers: ["ean_reader", "code_128_reader", "code_39_reader", "upc_reader"]
+        readers: ["code_128_reader"] // Zaměření na Code 128
       },
       locate: true
     }, err => {
       if (err) {
         console.error("Chyba inicializace Quagga:", err);
-        alert(translations['barcode_scanner_error'] || "Nepodařilo se spustit skener čárových kódů. Zkontroluj oprávnění kamery.");
+        alert(translations['barcode_scanner_error'] || "Nepodařilo se spustit skener čárových kódů. Zkontroluj oprávnění kamery a konzoli.");
         return;
       }
+      console.log("Quagga inicializováno, spouštím stream...");
       Quagga.start();
       Quagga.onDetected(data => {
         if (data && data.codeResult && data.codeResult.code) {
           const code = cleanCode(data.codeResult.code);
+          console.log("Detekovaný kód:", code); // Výstup pro ladění
           if (code.length > 6) {
             Quagga.stop();
             saveCard(selectedShop, code);
@@ -153,7 +156,7 @@ function startScanner() {
       });
     }).catch(err => {
       console.error("Chyba při spuštění Quagga:", err);
-      alert("Chyba při spuštění čtečky čárových kódů. Zkuste obnovit stránku.");
+      alert("Chyba při spuštění čtečky čárových kódů. Zkuste obnovit stránku a zkontroluj konzoli.");
     });
   }
 }
@@ -205,12 +208,13 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
           src: reader.result,
           numOfWorkers: 0,
           decoder: {
-            readers: ["ean_reader", "code_128_reader", "code_39_reader", "upc_reader"]
+            readers: ["code_128_reader"]
           },
           locate: true
         }, function (result) {
           if (result && result.codeResult && result.codeResult.code) {
             const code = cleanCode(result.codeResult.code);
+            console.log("Detekovaný kód z obrázku:", code);
             stopScanner();
             document.getElementById("manual-code").value = code;
             document.getElementById("confirm-code").disabled = false;
