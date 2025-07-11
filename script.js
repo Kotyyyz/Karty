@@ -128,14 +128,14 @@ function startScanner() {
           width: { min: 320 },
           height: { min: 240 }
         },
-        singleChannel: false // Povolení zpracování barev pro lepší detekci
+        singleChannel: false
       },
       locator: {
-        patchSize: "medium", // Přizpůsobení velikosti pro vybledlé kódy
-        halfSample: true // Snížení rozlišení pro rychlejší zpracování
+        patchSize: "medium",
+        halfSample: true
       },
       decoder: {
-        readers: ["code_128_reader", "ean_reader", "upc_reader"] // Širší podpora
+        readers: ["code_128_reader", "ean_reader", "upc_reader"]
       },
       locate: true
     }, err => {
@@ -149,7 +149,7 @@ function startScanner() {
       Quagga.onDetected(data => {
         if (data && data.codeResult && data.codeResult.code) {
           const code = cleanCode(data.codeResult.code);
-          console.log("Detekovaný kód:", code);
+          console.log("Původní kód:", data.codeResult.code, "Vyčištěný kód:", code);
           if (code.length > 6) {
             Quagga.stop();
             saveCard(selectedShop, code);
@@ -177,9 +177,16 @@ function stopScanner() {
   }
 }
 
-// Clean code by trimming trailing zeros
+// Clean code without removing trailing zeros for valid barcodes
 function cleanCode(code) {
-  return code.trim().replace(/0+$/, '');
+  // Trim only spaces, keep trailing zeros for EAN/UPC (12 or 13 digits)
+  const trimmedCode = code.trim();
+  // Check if it's a valid EAN/UPC length
+  if (/^\d{12,13}$/.test(trimmedCode)) {
+    return trimmedCode; // Return as is if it matches 12 or 13 digits
+  }
+  // For other formats, remove trailing zeros
+  return trimmedCode.replace(/0+$/, '');
 }
 
 // Handle image upload
@@ -219,7 +226,7 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
         }, function (result) {
           if (result && result.codeResult && result.codeResult.code) {
             const code = cleanCode(result.codeResult.code);
-            console.log("Detekovaný kód z obrázku:", code);
+            console.log("Původní kód z obrázku:", result.codeResult.code, "Vyčištěný kód:", code);
             stopScanner();
             document.getElementById("manual-code").value = code;
             document.getElementById("confirm-code").disabled = false;
@@ -330,7 +337,7 @@ function showBarcode(code) {
   const img = document.getElementById("display-code-img");
   const text = document.getElementById("display-code-text");
   title.textContent = card.shop;
-  text.textContent = card.code;
+  text.textContent = card.code; // Zobrazí vyčištěný kód
   img.src = card.type === "qr" 
     ? `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(card.code)}&size=200x200`
     : `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(card.code)}&code=Code128`;
