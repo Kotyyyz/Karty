@@ -75,37 +75,32 @@ function startScanner() {
           document.getElementById("scan-modal").classList.add("hidden");
         });
       },
-      error => {
-        // optional: log or handle scan errors
-      }
+      error => {}
     );
   } else {
     qrDiv.style.display = "none";
     barcodeDiv.style.display = "block";
 
-    Quagga.init(
-      {
-        inputStream: {
-          name: "Live",
-          type: "LiveStream",
-          target: barcodeDiv,
-        },
-        decoder: {
-          readers: ["ean_reader", "code_128_reader"]
-        }
+    Quagga.init({
+      inputStream: {
+        name: "Live",
+        type: "LiveStream",
+        target: barcodeDiv,
       },
-      err => {
-        if (!err) {
-          Quagga.start();
-          Quagga.onDetected(data => {
-            const code = data.codeResult.code;
-            Quagga.stop();
-            saveCard(selectedShop, code);
-            document.getElementById("scan-modal").classList.add("hidden");
-          });
-        }
+      decoder: {
+        readers: ["ean_reader", "code_128_reader"]
       }
-    );
+    }, err => {
+      if (!err) {
+        Quagga.start();
+        Quagga.onDetected(data => {
+          const code = data.codeResult.code;
+          Quagga.stop();
+          saveCard(selectedShop, code);
+          document.getElementById("scan-modal").classList.add("hidden");
+        });
+      }
+    });
   }
 }
 
@@ -208,12 +203,45 @@ function showBarcode(code) {
   modal.classList.remove("hidden");
 }
 
-// (Optional) Multijazyčná funkce připravená pro rozšíření
+// Aktivace tlačítka potvrdit při vyplnění inputu
+document.getElementById("manual-code").addEventListener("input", () => {
+  document.getElementById("confirm-code").disabled = !document.getElementById("manual-code").value.trim();
+});
+
+// Načtení QR kódu z nahraného obrázku
+document.getElementById("image-upload").addEventListener("change", function (e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function () {
+    const img = new Image();
+    img.onload = function () {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, canvas.width, canvas.height);
+
+      if (code) {
+        stopScanner();
+        document.getElementById("manual-code").value = code.data;
+        document.getElementById("confirm-code").disabled = false;
+      } else {
+        alert("QR kód nebyl rozpoznán.");
+      }
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+// Jazykový výběr (připraveno pro budoucnost)
 document.getElementById("lang-select").addEventListener("change", (e) => {
   const lang = e.target.value;
   localStorage.setItem("preferredLanguage", lang);
-  // zde by se načetl překlad (např. přes JSON) a přepsaly by se texty v UI
-  // zatím není implementováno
 });
 
 renderCards();

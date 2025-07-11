@@ -9,6 +9,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 </head>
 <body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white min-h-screen transition-colors duration-300">
 
@@ -64,7 +65,7 @@
       <div id="barcode-reader" class="mb-4 w-full"></div>
       <input type="file" id="image-upload" accept="image/*" class="mb-2" />
       <input type="text" id="manual-code" placeholder="Zadej číslo ručně" class="w-full p-2 border rounded mb-4"/>
-      <button id="confirm-code" class="w-full bg-green-600 text-white p-2 rounded font-bold">Potvrdit</button>
+      <button id="confirm-code" disabled class="w-full bg-green-600 text-white p-2 rounded font-bold">Potvrdit</button>
     </div>
   </div>
 
