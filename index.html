@@ -94,31 +94,6 @@
       </div>
     </div>
   </div>
-  <!-- Výběr typu čárového kódu -->
-  <div id="barcode-type-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
-    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl max-w-md w-full relative text-center">
-      <button id="barcode-type-close" class="absolute top-2 right-2 text-gray-500 hover:text-red-500 close-btn">✕</button>
-      <h2 class="text-xl font-semibold mb-4" data-i18n="select_barcode_type">Vyber typ čárového kódu</h2>
-      <div class="grid grid-cols-1 gap-4">
-        <button class="barcode-type-btn bg-gray-200 dark:bg-gray-700 p-2 rounded flex items-center justify-center" data-type="auto">
-          <img src="https://barcode.tec-it.com/barcode.ashx?data=123456789012&code=Auto" alt="Auto Detect" class="barcode-preview mr-2">
-          <span data-i18n="auto_detect">Automatická detekce</span>
-        </button>
-        <button class="barcode-type-btn bg-gray-200 dark:bg-gray-700 p-2 rounded flex items-center justify-center" data-type="ean">
-          <img src="https://barcode.tec-it.com/barcode.ashx?data=5901234123457&code=EAN13" alt="EAN-13" class="barcode-preview mr-2">
-          <span data-i18n="ean_13">EAN-13</span>
-        </button>
-        <button class="barcode-type-btn bg-gray-200 dark:bg-gray-700 p-2 rounded flex items-center justify-center" data-type="upc">
-          <img src="https://barcode.tec-it.com/barcode.ashx?data=012345678905&code=UPC" alt="UPC-A" class="barcode-preview mr-2">
-          <span data-i18n="upc_a">UPC-A</span>
-        </button>
-        <button class="barcode-type-btn bg-gray-200 dark:bg-gray-700 p-2 rounded flex items-center justify-center" data-type="code_128">
-          <img src="https://barcode.tec-it.com/barcode.ashx?data=ABC123XYZ&code=Code128" alt="Code 128" class="barcode-preview mr-2">
-          <span data-i18n="code_128">Code 128</span>
-        </button>
-      </div>
-    </div>
-  </div>
   <!-- Výběr typu skenu -->
   <div id="scan-type-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl max-w-sm w-full relative text-center">
@@ -126,6 +101,23 @@
       <h2 class="text-xl font-semibold mb-4" data-i18n="select_code_type">Vyber typ kódu</h2>
       <button class="scan-type-btn bg-green-500 text-white p-2 rounded mb-2 w-full" data-type="qr" data-i18n="qr_code">QR kód</button>
       <button class="scan-type-btn bg-indigo-600 text-white p-2 rounded w-full" data-type="barcode" data-i18n="barcode">Čárový kód</button>
+    </div>
+  </div>
+  <!-- Výběr typu čárového kódu -->
+  <div id="barcode-type-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl max-w-md w-full relative text-center">
+      <button id="barcode-type-close" class="absolute top-2 right-2 text-gray-500 hover:text-red-500 close-btn">✕</button>
+      <h2 class="text-xl font-semibold mb-4" data-i18n="select_barcode_type">Vyber typ čárového kódu</h2>
+      <div class="grid grid-cols-1 gap-4">
+        <button class="barcode-type-btn bg-gray-200 dark:bg-gray-700 p-2 rounded flex items-center justify-center" data-type="ean">
+          <img src="https://barcode.tec-it.com/barcode.ashx?data=5901234123457&code=EAN13" alt="EAN-13" class="barcode-preview mr-2">
+          <span data-i18n="ean_13">EAN-13</span>
+        </button>
+        <button class="barcode-type-btn bg-gray-200 dark:bg-gray-700 p-2 rounded flex items-center justify-center" data-type="code_128">
+          <img src="https://barcode.tec-it.com/barcode.ashx?data=ABC123XYZ&code=Code128" alt="Code 128" class="barcode-preview mr-2">
+          <span data-i18n="code_128">Code 128</span>
+        </button>
+      </div>
     </div>
   </div>
   <!-- Skenování -->

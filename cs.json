@@ -1,15 +1,8 @@
 {
-  "title": "Moje Karty",
-  "add_card": "+",
-  "select_store": "Vyber obchod",
   "select_code_type": "Vyber typ kódu",
   "qr_code": "QR kód",
   "barcode": "Čárový kód",
-  "scan_or_manual": "Načti kód nebo zadej ručně",
-  "manual_code_placeholder": "Zadej číslo ručně",
-  "confirm": "Potvrdit",
-  "qr_scanner_error": "Nepodařilo se spustit skener QR kódů. Zkontroluj oprávnění kamery.",
-  "barcode_scanner_error": "Nepodařilo se spustit skener čárových kódů. Zkontroluj oprávnění kamery.",
-  "qr_not_recognized": "QR kód nebyl rozpoznán. Zkontroluj kvalitu obrázku.",
-  "barcode_not_recognized": "Čárový kód nebyl rozpoznán. Zkontroluj kvalitu obrázku."
+  "select_barcode_type": "Vyber typ čárového kódu",
+  "ean_13": "EAN-13",
+  "code_128": "Code 128"
 }

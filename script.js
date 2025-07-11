@@ -1,6 +1,6 @@
 let selectedShop = null;
 let selectedScanType = "qr";
-let selectedBarcodeType = "auto"; // Výchozí typ čárového kódu
+let selectedBarcodeType = "ean"; // Výchozí typ čárového kódu (EAN-13)
 let html5QrCode;
 let translations = {};
 
@@ -52,12 +52,12 @@ document.getElementById("modal-close").addEventListener("click", () => {
   document.getElementById("shop-modal").classList.add("hidden");
 });
 
-document.getElementById("barcode-type-close").addEventListener("click", () => {
-  document.getElementById("barcode-type-modal").classList.add("hidden");
-});
-
 document.getElementById("scan-type-close").addEventListener("click", () => {
   document.getElementById("scan-type-modal").classList.add("hidden");
+});
+
+document.getElementById("barcode-type-close").addEventListener("click", () => {
+  document.getElementById("barcode-type-modal").classList.add("hidden");
 });
 
 document.getElementById("scan-close").addEventListener("click", () => {
@@ -73,14 +73,6 @@ document.querySelectorAll(".shop-option").forEach(btn => {
   btn.addEventListener("click", () => {
     selectedShop = btn.dataset.shop;
     document.getElementById("shop-modal").classList.add("hidden");
-    document.getElementById("barcode-type-modal").classList.remove("hidden");
-  });
-});
-
-document.querySelectorAll(".barcode-type-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    selectedBarcodeType = btn.dataset.type;
-    document.getElementById("barcode-type-modal").classList.add("hidden");
     document.getElementById("scan-type-modal").classList.remove("hidden");
   });
 });
@@ -88,7 +80,22 @@ document.querySelectorAll(".barcode-type-btn").forEach(btn => {
 document.querySelectorAll(".scan-type-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     selectedScanType = btn.dataset.type;
-    document.getElementById("scan-type-modal").classList.add("hidden");
+    if (selectedScanType === "barcode") {
+      document.getElementById("scan-type-modal").classList.add("hidden");
+      document.getElementById("barcode-type-modal").classList.remove("hidden");
+    } else {
+      document.getElementById("scan-type-modal").classList.add("hidden");
+      document.getElementById("scan-modal").classList.remove("hidden");
+      updateScannerDisplay();
+      startScanner();
+    }
+  });
+});
+
+document.querySelectorAll(".barcode-type-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    selectedBarcodeType = btn.dataset.type;
+    document.getElementById("barcode-type-modal").classList.add("hidden");
     document.getElementById("scan-modal").classList.remove("hidden");
     updateScannerDisplay();
     startScanner();
@@ -136,15 +143,11 @@ function startScanner() {
       case "ean":
         readers = ["ean_reader"];
         break;
-      case "upc":
-        readers = ["upc_reader"];
-        break;
       case "code_128":
         readers = ["code_128_reader"];
         break;
-      case "auto":
       default:
-        readers = ["code_128_reader", "ean_reader", "upc_reader"];
+        readers = ["ean_reader", "code_128_reader"]; // Fallback na oba podporované typy
         break;
     }
 
@@ -248,15 +251,11 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
           case "ean":
             readers = ["ean_reader"];
             break;
-          case "upc":
-            readers = ["upc_reader"];
-            break;
           case "code_128":
             readers = ["code_128_reader"];
             break;
-          case "auto":
           default:
-            readers = ["code_128_reader", "ean_reader", "upc_reader"];
+            readers = ["ean_reader", "code_128_reader"];
             break;
         }
         Quagga.decodeSingle({
@@ -383,7 +382,7 @@ function showBarcode(code) {
   text.textContent = card.code;
   img.src = card.type === "qr" 
     ? `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(card.code)}&size=200x200`
-    : `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(card.code)}&code=${selectedBarcodeType === "code_128" ? "Code128" : selectedBarcodeType === "ean" ? "EAN13" : "UPC"}`;
+    : `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(card.code)}&code=${selectedBarcodeType === "code_128" ? "Code128" : "EAN13"}`;
   modal.classList.remove("hidden");
 }
 
