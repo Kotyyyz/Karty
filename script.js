@@ -1,6 +1,36 @@
 let selectedShop = null;
 let selectedScanType = "qr";
 let html5QrCode;
+let translations = {};
+
+// Funkce pro načtení překladů z JSON
+async function loadTranslations(lang) {
+  try {
+    const response = await fetch(`./${lang}.json`);
+    translations = await response.json();
+    applyTranslations();
+  } catch (error) {
+    console.error(`Nepodařilo se načíst překlady pro jazyk ${lang}:`, error);
+    alert(`Nepodařilo se načíst překlady pro jazyk ${lang}.`);
+  }
+}
+
+// Funkce pro aplikaci překladů na DOM
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(element => {
+    const key = element.getAttribute('data-i18n');
+    if (translations[key]) {
+      element.textContent = translations[key];
+    }
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+    const key = element.getAttribute('data-i18n-placeholder');
+    if (translations[key]) {
+      element.placeholder = translations[key];
+    }
+  });
+  document.title = translations['title'] || 'Moje Karty';
+}
 
 const themeToggle = document.getElementById("theme-toggle");
 themeToggle.addEventListener("click", () => {
@@ -78,7 +108,7 @@ function startScanner() {
       error => {}
     ).catch(err => {
       console.error("Failed to start QR scanner:", err);
-      alert("Nepodařilo se spustit skener QR kódů. Zkontroluj oprávnění kamery.");
+      alert(translations['qr_scanner_error'] || "Nepodařilo se spustit skener QR kódů. Zkontroluj oprávnění kamery.");
     });
   } else {
     qrDiv.style.display = "none";
@@ -98,12 +128,12 @@ function startScanner() {
       err => {
         if (err) {
           console.error("Failed to initialize Quagga:", err);
-          alert("Nepodařilo se spustit skener čárových kódů. Zkontroluj oprávnění kamery.");
+          alert(translations['barcode_scanner_error'] || "Nepodařilo se spustit skener čárových kódů. Zkontroluj oprávnění kamery.");
           return;
         }
         Quagga.start();
         Quagga.onDetected(data => {
-          const code = cleanCode(data.codeResult.code); // Očistíme kód
+          const code = cleanCode(data.codeResult.code);
           Quagga.stop();
           saveCard(selectedShop, code);
           document.getElementById("scan-modal").classList.add("hidden");
@@ -123,9 +153,7 @@ function stopScanner() {
   }
 }
 
-// Nová funkce pro očištění kódu
 function cleanCode(code) {
-  // Odstraníme nadbytečné nuly na konci a přebytečné mezery
   return code.trim().replace(/0+$/, '');
 }
 
@@ -151,7 +179,7 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
           document.getElementById("manual-code").value = code.data;
           document.getElementById("confirm-code").disabled = false;
         } else {
-          alert("QR kód nebyl rozpoznán. Zkontroluj kvalitu obrázku.");
+          alert(translations['qr_not_recognized'] || "QR kód nebyl rozpoznán. Zkontroluj kvalitu obrázku.");
         }
       } else {
         Quagga.init(
@@ -168,12 +196,12 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
           err => {
             if (err) {
               console.error("Failed to initialize Quagga for image:", err);
-              alert("Nepodařilo se rozpoznat čárový kód. Zkontroluj kvalitu obrázku.");
+              alert(translations['barcode_not_recognized'] || "Nepodařilo se rozpoznat čárový kód. Zkontroluj kvalitu obrázku.");
               return;
             }
             Quagga.start();
             Quagga.onDetected(data => {
-              const code = cleanCode(data.codeResult.code); // Očistíme kód
+              const code = cleanCode(data.codeResult.code);
               Quagga.stop();
               document.getElementById("manual-code").value = code;
               document.getElementById("confirm-code").disabled = false;
@@ -181,7 +209,7 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
             Quagga.onProcessed(result => {
               if (!result || !result.codeResult) {
                 Quagga.stop();
-                alert("Čárový kód nebyl rozpoznán. Zkontroluj kvalitu obrázku.");
+                alert(translations['barcode_not_recognized'] || "Čárový kód nebyl rozpoznán. Zkontroluj kvalitu obrázku.");
               }
             });
           }
@@ -194,7 +222,6 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
 });
 
 function saveCard(shop, code) {
-  // Očistíme kód před uložením
   const cleanedCode = cleanCode(code);
   const cards = JSON.parse(localStorage.getItem("cards") || "[]");
   cards.push({ shop, code: cleanedCode, type: selectedScanType });
@@ -239,7 +266,7 @@ function renderCards() {
   const add = document.createElement("div");
   add.id = "add-card-btn";
   add.className = "flex items-center justify-center border-2 border-dashed rounded-2xl aspect-[3/2] cursor-pointer bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition";
-  add.innerHTML = `<div class="text-4xl text-gray-400">+</div>`;
+  add.innerHTML = `<div class="text-4xl text-gray-400" data-i18n="add_card">${translations['add_card'] || '+'}</div>`;
   add.addEventListener("click", () => document.getElementById("shop-modal").classList.remove("hidden"));
   grid.appendChild(add);
 }
@@ -292,9 +319,17 @@ function showBarcode(code) {
   modal.classList.remove("hidden");
 }
 
+// Inicializace jazyka při načtení stránky
+document.addEventListener("DOMContentLoaded", () => {
+  const savedLang = localStorage.getItem("preferredLanguage") || "cs";
+  document.getElementById("lang-select").value = savedLang;
+  loadTranslations(savedLang);
+});
+
 document.getElementById("lang-select").addEventListener("change", (e) => {
   const lang = e.target.value;
   localStorage.setItem("preferredLanguage", lang);
+  loadTranslations(lang);
 });
 
 renderCards();

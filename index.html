@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Moje Karty</title>
+  <title data-i18n="title">Moje Karty</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/cdn/0.12.1/quagga.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 </head>
 <body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white min-h-screen transition-colors duration-300">
@@ -23,40 +23,40 @@
       </select>
       <button id="theme-toggle" class="border px-2 py-1 rounded">🌙 / ☀️</button>
     </div>
-    <h1 class="text-xl font-bold">Moje Karty</h1>
+    <h1 class="text-xl font-bold" data-i18n="title">Moje Karty</h1>
   </header>
 
   <!-- Grid karet -->
   <main id="card-grid" class="grid grid-cols-2 gap-4 p-4">
     <div id="add-card-btn" class="flex items-center justify-center border-2 border-dashed rounded-2xl aspect-[3/2] cursor-pointer bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition">
-      <div class="text-4xl text-gray-400">+</div>
+      <div class="text-4xl text-gray-400" data-i18n="add_card">+</div>
     </div>
   </main>
 
-<!-- Výběr obchodů -->
-<div id="shop-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
-  <div class="bg-white dark:bg-gray-800 p-6 rounded-xl max-w-sm w-full relative">
-    <button id="modal-close" class="absolute top-2 right-2 text-gray-500 hover:text-red-500">✕</button>
-    <h2 class="text-xl font-semibold mb-4 text-center">Vyber obchod</h2>
-    <div class="grid grid-cols-1 gap-4 max-h-[400px] overflow-y-auto">
-      <button class="shop-option bg-yellow-400 text-black rounded-lg p-4 text-center font-bold" data-shop="Lidl">🛒 Lidl</button>
-      <button class="shop-option bg-red-600 text-white rounded-lg p-4 text-center font-bold" data-shop="Kaufland">🏪 Kaufland</button>
-      <button class="shop-option bg-blue-600 text-white rounded-lg p-4 text-center font-bold" data-shop="Tesco">🧾 Tesco</button>
-      <button class="shop-option bg-teal-500 text-white rounded-lg p-4 text-center font-bold" data-shop="Albert">🛍 Albert</button>
-      <button class="shop-option bg-yellow-500 text-black rounded-lg p-4 text-center font-bold" data-shop="Billa">🛑 Billa</button>
-      <button class="shop-option bg-orange-600 text-white rounded-lg p-4 text-center font-bold" data-shop="Penny">🛠 Penny</button>
-      <button class="shop-option bg-red-700 text-white rounded-lg p-4 text-center font-bold" data-shop="Biedronka">🐞 Biedronka</button>
+  <!-- Výběr obchodů -->
+  <div id="shop-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl max-w-sm w-full relative">
+      <button id="modal-close" class="absolute top-2 right-2 text-gray-500 hover:text-red-500">✕</button>
+      <h2 class="text-xl font-semibold mb-4 text-center" data-i18n="select_store">Vyber obchod</h2>
+      <div class="grid grid-cols-1 gap-4 max-h-[400px] overflow-y-auto">
+        <button class="shop-option bg-yellow-400 text-black rounded-lg p-4 text-center font-bold" data-shop="Lidl">🛒 Lidl</button>
+        <button class="shop-option bg-red-600 text-white rounded-lg p-4 text-center font-bold" data-shop="Kaufland">🏪 Kaufland</button>
+        <button class="shop-option bg-blue-600 text-white rounded-lg p-4 text-center font-bold" data-shop="Tesco">🧾 Tesco</button>
+        <button class="shop-option bg-teal-500 text-white rounded-lg p-4 text-center font-bold" data-shop="Albert">🛍 Albert</button>
+        <button class="shop-option bg-yellow-500 text-black rounded-lg p-4 text-center font-bold" data-shop="Billa">🛑 Billa</button>
+        <button class="shop-option bg-orange-600 text-white rounded-lg p-4 text-center font-bold" data-shop="Penny">🛠 Penny</button>
+        <button class="shop-option bg-red-700 text-white rounded-lg p-4 text-center font-bold" data-shop="Biedronka">🐞 Biedronka</button>
+      </div>
     </div>
   </div>
-</div>
 
   <!-- Výběr typu skenu -->
   <div id="scan-type-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl max-w-sm w-full relative text-center">
       <button id="scan-type-close" class="absolute top-2 right-2 text-gray-500 hover:text-red-500">✕</button>
-      <h2 class="text-xl font-semibold mb-4">Vyber typ kódu</h2>
-      <button class="scan-type-btn bg-green-500 text-white p-2 rounded mb-2 w-full" data-type="qr">QR kód</button>
-      <button class="scan-type-btn bg-indigo-600 text-white p-2 rounded w-full" data-type="barcode">Čárový kód</button>
+      <h2 class="text-xl font-semibold mb-4" data-i18n="select_code_type">Vyber typ kódu</h2>
+      <button class="scan-type-btn bg-green-500 text-white p-2 rounded mb-2 w-full" data-type="qr" data-i18n="qr_code">QR kód</button>
+      <button class="scan-type-btn bg-indigo-600 text-white p-2 rounded w-full" data-type="barcode" data-i18n="barcode">Čárový kód</button>
     </div>
   </div>
 
@@ -64,12 +64,12 @@
   <div id="scan-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl max-w-md w-full relative">
       <button id="scan-close" class="absolute top-2 right-2 text-gray-500 hover:text-red-500">✕</button>
-      <h2 class="text-xl font-semibold mb-4 text-center">Načti kód nebo zadej ručně</h2>
+      <h2 class="text-xl font-semibold mb-4 text-center" data-i18n="scan_or_manual">Načti kód nebo zadej ručně</h2>
       <div id="qr-reader" class="mb-4"></div>
       <div id="barcode-reader" class="mb-4 w-full"></div>
       <input type="file" id="image-upload" accept="image/*" class="mb-2" />
-      <input type="text" id="manual-code" placeholder="Zadej číslo ručně" class="w-full p-2 border rounded mb-4"/>
-      <button id="confirm-code" disabled class="w-full bg-green-600 text-white p-2 rounded font-bold">Potvrdit</button>
+      <input type="text" id="manual-code" placeholder="Zadej číslo ručně" class="w-full p-2 border rounded mb-4" data-i18n-placeholder="manual_code_placeholder"/>
+      <button id="confirm-code" disabled class="w-full bg-green-600 text-white p-2 rounded font-bold" data-i18n="confirm">Potvrdit</button>
     </div>
   </div>
 
