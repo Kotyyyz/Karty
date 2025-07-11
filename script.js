@@ -103,7 +103,7 @@ function startScanner() {
         }
         Quagga.start();
         Quagga.onDetected(data => {
-          const code = data.codeResult.code;
+          const code = cleanCode(data.codeResult.code); // Očistíme kód
           Quagga.stop();
           saveCard(selectedShop, code);
           document.getElementById("scan-modal").classList.add("hidden");
@@ -121,6 +121,12 @@ function stopScanner() {
   if (Quagga && Quagga.isRunning) {
     Quagga.stop();
   }
+}
+
+// Nová funkce pro očištění kódu
+function cleanCode(code) {
+  // Odstraníme nadbytečné nuly na konci a přebytečné mezery
+  return code.trim().replace(/0+$/, '');
 }
 
 document.getElementById("image-upload").addEventListener("change", function (e) {
@@ -167,7 +173,7 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
             }
             Quagga.start();
             Quagga.onDetected(data => {
-              const code = data.codeResult.code;
+              const code = cleanCode(data.codeResult.code); // Očistíme kód
               Quagga.stop();
               document.getElementById("manual-code").value = code;
               document.getElementById("confirm-code").disabled = false;
@@ -188,8 +194,10 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
 });
 
 function saveCard(shop, code) {
+  // Očistíme kód před uložením
+  const cleanedCode = cleanCode(code);
   const cards = JSON.parse(localStorage.getItem("cards") || "[]");
-  cards.push({ shop, code, type: selectedScanType });
+  cards.push({ shop, code: cleanedCode, type: selectedScanType });
   localStorage.setItem("cards", JSON.stringify(cards));
   renderCards();
 }
