@@ -105,7 +105,9 @@ function startScanner() {
           document.getElementById("scan-modal").classList.add("hidden");
         });
       },
-      error => {}
+      error => {
+        console.error("QR scan error:", error);
+      }
     ).catch(err => {
       console.error("Failed to start QR scanner:", err);
       alert(translations['qr_scanner_error'] || "Nepodařilo se spustit skener QR kódů. Zkontroluj oprávnění kamery.");
@@ -114,32 +116,37 @@ function startScanner() {
     qrDiv.style.display = "none";
     barcodeDiv.style.display = "block";
 
-    Quagga.init(
-      {
-        inputStream: {
-          name: "Live",
-          type: "LiveStream",
-          target: barcodeDiv,
-        },
-        decoder: {
-          readers: ["ean_reader", "code_128_reader"]
+    Quagga.init({
+      inputStream: {
+        name: "Live",
+        type: "LiveStream",
+        target: barcodeDiv,
+        constraints: {
+          facingMode: "environment" // Prefer rear camera
         }
       },
-      err => {
-        if (err) {
-          console.error("Failed to initialize Quagga:", err);
-          alert(translations['barcode_scanner_error'] || "Nepodařilo se spustit skener čárových kódů. Zkontroluj oprávnění kamery.");
-          return;
-        }
-        Quagga.start();
-        Quagga.onDetected(data => {
-          const code = cleanCode(data.codeResult.code);
-          Quagga.stop();
-          saveCard(selectedShop, code);
-          document.getElementById("scan-modal").classList.add("hidden");
-        });
+      locator: {
+        patchSize: "medium",
+        halfSample: true
+      },
+      decoder: {
+        readers: ["ean_reader", "code_128_reader", "code_39_reader", "code_93_reader", "upc_reader", "upc_e_reader"]
+      },
+      locate: true
+    }, err => {
+      if (err) {
+        console.error("Failed to initialize Quagga:", err);
+        alert(translations['barcode_scanner_error'] || "Nepodařilo se spustit skener čárových kódů. Zkontroluj oprávnění kamery.");
+        return;
       }
-    );
+      Quagga.start();
+      Quagga.onDetected(data => {
+        const code = cleanCode(data.codeResult.code);
+        Quagga.stop();
+        saveCard(selectedShop, code);
+        document.getElementById("scan-modal").classList.add("hidden");
+      });
+    });
   }
 }
 
@@ -163,60 +170,23 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
 
   const reader = new FileReader();
   reader.onload = function () {
-    const img = new Image();
-    img.onload = function () {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0);
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-      if (selectedScanType === "qr") {
-        const code = jsQR(imageData.data, imageData.width, imageData.height);
-        if (code && code.data) {
-          stopScanner();
-          document.getElementById("manual-code").value = code.data;
-          document.getElementById("confirm-code").disabled = false;
-        } else {
-          alert(translations['qr_not_recognized'] || "QR kód nebyl rozpoznán. Zkontroluj kvalitu obrázku.");
-        }
+    Quagga.decodeSingle({
+      decoder: {
+        readers: ["ean_reader", "code_128_reader", "code_39_reader", "code_93_reader", "upc_reader", "upc_e_reader"]
+      },
+      locate: true,
+      src: reader.result
+    }, function (result) {
+      if (result && result.codeResult) {
+        const code = cleanCode(result.codeResult.code);
+        stopScanner();
+        document.getElementById("manual-code").value = code;
+        document.getElementById("confirm-code").disabled = false;
       } else {
-        Quagga.init(
-          {
-            inputStream: {
-              name: "Static",
-              type: "ImageStream",
-              target: canvas,
-            },
-            decoder: {
-              readers: ["ean_reader", "code_128_reader"]
-            }
-          },
-          err => {
-            if (err) {
-              console.error("Failed to initialize Quagga for image:", err);
-              alert(translations['barcode_not_recognized'] || "Nepodařilo se rozpoznat čárový kód. Zkontroluj kvalitu obrázku.");
-              return;
-            }
-            Quagga.start();
-            Quagga.onDetected(data => {
-              const code = cleanCode(data.codeResult.code);
-              Quagga.stop();
-              document.getElementById("manual-code").value = code;
-              document.getElementById("confirm-code").disabled = false;
-            });
-            Quagga.onProcessed(result => {
-              if (!result || !result.codeResult) {
-                Quagga.stop();
-                alert(translations['barcode_not_recognized'] || "Čárový kód nebyl rozpoznán. Zkontroluj kvalitu obrázku.");
-              }
-            });
-          }
-        );
+        alert(translations['barcode_not_recognized'] || "Čárový kód nebyl rozpoznán. Zkontroluj kvalitu obrázku a formát.");
+        console.log("Quagga decode result:", result);
       }
-    };
-    img.src = reader.result;
+    });
   };
   reader.readAsDataURL(file);
 });
@@ -280,6 +250,7 @@ function getIcon(shop) {
     case "Billa": return "🛑";
     case "Penny": return "🛠";
     case "Biedronka": return "🐞";
+    case "beYPc": return "⛽"; // Přidán beYPc
     default: return "📦";
   }
 }
@@ -293,6 +264,7 @@ function getCardColor(shop) {
     case "Billa": return "bg-yellow-500 text-black";
     case "Penny": return "bg-orange-600 text-white";
     case "Biedronka": return "bg-red-700 text-white";
+    case "beYPc": return "bg-green-600 text-white"; // Přidán beYPc
     default: return "bg-gray-200 text-black";
   }
 }
