@@ -102,7 +102,7 @@ function startScanner() {
     html5QrCode = new Html5Qrcode("qr-scanner");
     html5QrCode.start(
       { facingMode: "environment" },
-      { fps: 10, qrbox: { width: 250, height: 250 } },
+      { fps: 10 },
       decodedText => {
         if (decodedText) {
           html5QrCode.stop().then(() => {
@@ -122,7 +122,11 @@ function startScanner() {
         name: "Live",
         type: "LiveStream",
         target: barcodeDiv,
-        constraints: { facingMode: "environment", width: 640, height: 480 }
+        constraints: { 
+          facingMode: "environment", 
+          width: 320, 
+          height: 240 
+        }
       },
       decoder: {
         readers: ["ean_reader", "code_128_reader", "code_39_reader", "upc_reader"]
@@ -130,19 +134,26 @@ function startScanner() {
       locate: true
     }, err => {
       if (err) {
-        console.error("Failed to initialize Quagga:", err);
-        alert(translations['barcode_scanner_error'] || "Nepodařilo se spustit skener čárových kódů.");
+        console.error("Chyba inicializace Quagga:", err);
+        alert(translations['barcode_scanner_error'] || "Nepodařilo se spustit skener čárových kódů. Zkontroluj oprávnění kamery.");
         return;
       }
       Quagga.start();
       Quagga.onDetected(data => {
-        const code = cleanCode(data.codeResult.code);
-        if (code && code.length > 6) {
-          Quagga.stop();
-          saveCard(selectedShop, code);
-          document.getElementById("scan-modal").classList.add("hidden");
+        if (data && data.codeResult && data.codeResult.code) {
+          const code = cleanCode(data.codeResult.code);
+          if (code.length > 6) {
+            Quagga.stop();
+            saveCard(selectedShop, code);
+            document.getElementById("scan-modal").classList.add("hidden");
+          }
+        } else {
+          console.warn("Neplatná detekce čárového kódu:", data);
         }
       });
+    }).catch(err => {
+      console.error("Chyba při spuštění Quagga:", err);
+      alert("Chyba při spuštění čtečky čárových kódů. Zkuste obnovit stránku.");
     });
   }
 }
@@ -192,13 +203,13 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
       } else {
         Quagga.decodeSingle({
           src: reader.result,
-          numOfWorkers: 0, // Run in main thread to avoid worker issues
+          numOfWorkers: 0,
           decoder: {
             readers: ["ean_reader", "code_128_reader", "code_39_reader", "upc_reader"]
           },
           locate: true
         }, function (result) {
-          if (result && result.codeResult) {
+          if (result && result.codeResult && result.codeResult.code) {
             const code = cleanCode(result.codeResult.code);
             stopScanner();
             document.getElementById("manual-code").value = code;
