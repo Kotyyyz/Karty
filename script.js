@@ -1,5 +1,5 @@
 let selectedShop = null;
-let selectedScanType = "qr";
+let selectedScanType = "qr"; // Ensure default value is set
 let html5QrCode;
 let translations = {};
 
@@ -30,6 +30,23 @@ function applyTranslations() {
     }
   });
   document.title = translations['title'] || 'Moje Karty';
+}
+
+// Funkce pro aktualizaci zobrazení skeneru
+function updateScannerDisplay() {
+  const qrDiv = document.getElementById("qr-reader");
+  const barcodeDiv = document.getElementById("barcode-reader");
+  if (selectedScanType === "qr") {
+    qrDiv.classList.add("qr-active");
+    barcodeDiv.classList.remove("barcode-active");
+    qrDiv.style.display = "block";
+    barcodeDiv.style.display = "none";
+  } else {
+    qrDiv.classList.remove("qr-active");
+    barcodeDiv.classList.add("barcode-active");
+    qrDiv.style.display = "none";
+    barcodeDiv.style.display = "block";
+  }
 }
 
 const themeToggle = document.getElementById("theme-toggle");
@@ -72,6 +89,7 @@ document.querySelectorAll(".scan-type-btn").forEach(btn => {
     selectedScanType = btn.dataset.type;
     document.getElementById("scan-type-modal").classList.add("hidden");
     document.getElementById("scan-modal").classList.remove("hidden");
+    updateScannerDisplay(); // Update display before starting scanner
     startScanner();
   });
 });
@@ -122,7 +140,7 @@ function startScanner() {
         type: "LiveStream",
         target: barcodeDiv,
         constraints: {
-          facingMode: "environment" // Prefer rear camera
+          facingMode: "environment"
         }
       },
       locator: {
@@ -187,6 +205,7 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
           document.getElementById("confirm-code").disabled = false;
         } else {
           alert(translations['qr_not_recognized'] || "QR kód nebyl rozpoznán. Zkontroluj kvalitu obrázku.");
+          document.getElementById("confirm-code").disabled = true;
         }
       } else {
         Quagga.decodeSingle({
@@ -203,6 +222,7 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
             document.getElementById("confirm-code").disabled = false;
           } else {
             alert(translations['barcode_not_recognized'] || "Čárový kód nebyl rozpoznán. Zkontroluj kvalitu obrázku a formát.");
+            document.getElementById("confirm-code").disabled = true;
             console.log("Quagga decode result:", result);
           }
         });
@@ -313,11 +333,12 @@ function showBarcode(code) {
   modal.classList.remove("hidden");
 }
 
-// Inicializace jazyka při načtení stránky
+// Inicializace jazyka a skeneru při načtení stránky
 document.addEventListener("DOMContentLoaded", () => {
   const savedLang = localStorage.getItem("preferredLanguage") || "cs";
   document.getElementById("lang-select").value = savedLang;
   loadTranslations(savedLang);
+  updateScannerDisplay(); // Initialize display with default selectedScanType
 });
 
 document.getElementById("lang-select").addEventListener("change", (e) => {
