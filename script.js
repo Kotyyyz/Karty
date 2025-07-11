@@ -249,6 +249,10 @@ function getIcon(shop) {
     case "Lidl": return "🛒";
     case "Kaufland": return "🏪";
     case "Tesco": return "🧾";
+    case "Albert": return "🛍";
+    case "Billa": return "🛑";
+    case "Penny": return "🛠";
+    case "Biedronka": return "🐞";
     default: return "📦";
   }
 }
@@ -258,6 +262,10 @@ function getCardColor(shop) {
     case "Lidl": return "bg-yellow-300 text-black";
     case "Kaufland": return "bg-red-500 text-white";
     case "Tesco": return "bg-blue-600 text-white";
+    case "Albert": return "bg-teal-500 text-white";
+    case "Billa": return "bg-yellow-500 text-black";
+    case "Penny": return "bg-orange-600 text-white";
+    case "Biedronka": return "bg-red-700 text-white";
     default: return "bg-gray-200 text-black";
   }
 }

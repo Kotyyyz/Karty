@@ -33,18 +33,22 @@
     </div>
   </main>
 
-  <!-- Výběr obchodů -->
-  <div id="shop-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
-    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl max-w-sm w-full relative">
-      <button id="modal-close" class="absolute top-2 right-2 text-gray-500 hover:text-red-500">✕</button>
-      <h2 class="text-xl font-semibold mb-4 text-center">Vyber obchod</h2>
-      <div class="grid grid-cols-1 gap-4">
-        <button class="shop-option bg-yellow-400 text-black rounded-lg p-4 text-center font-bold" data-shop="Lidl">🛒 Lidl</button>
-        <button class="shop-option bg-red-600 text-white rounded-lg p-4 text-center font-bold" data-shop="Kaufland">🏪 Kaufland</button>
-        <button class="shop-option bg-blue-600 text-white rounded-lg p-4 text-center font-bold" data-shop="Tesco">🧾 Tesco</button>
-      </div>
+<!-- Výběr obchodů -->
+<div id="shop-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
+  <div class="bg-white dark:bg-gray-800 p-6 rounded-xl max-w-sm w-full relative">
+    <button id="modal-close" class="absolute top-2 right-2 text-gray-500 hover:text-red-500">✕</button>
+    <h2 class="text-xl font-semibold mb-4 text-center">Vyber obchod</h2>
+    <div class="grid grid-cols-1 gap-4 max-h-[400px] overflow-y-auto">
+      <button class="shop-option bg-yellow-400 text-black rounded-lg p-4 text-center font-bold" data-shop="Lidl">🛒 Lidl</button>
+      <button class="shop-option bg-red-600 text-white rounded-lg p-4 text-center font-bold" data-shop="Kaufland">🏪 Kaufland</button>
+      <button class="shop-option bg-blue-600 text-white rounded-lg p-4 text-center font-bold" data-shop="Tesco">🧾 Tesco</button>
+      <button class="shop-option bg-teal-500 text-white rounded-lg p-4 text-center font-bold" data-shop="Albert">🛍 Albert</button>
+      <button class="shop-option bg-yellow-500 text-black rounded-lg p-4 text-center font-bold" data-shop="Billa">🛑 Billa</button>
+      <button class="shop-option bg-orange-600 text-white rounded-lg p-4 text-center font-bold" data-shop="Penny">🛠 Penny</button>
+      <button class="shop-option bg-red-700 text-white rounded-lg p-4 text-center font-bold" data-shop="Biedronka">🐞 Biedronka</button>
     </div>
   </div>
+</div>
 
   <!-- Výběr typu skenu -->
   <div id="scan-type-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
