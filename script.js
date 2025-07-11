@@ -1,6 +1,6 @@
 let selectedShop = null;
 let selectedScanType = "qr";
-let selectedBarcodeType = "auto"; // Nová proměnná pro typ čárového kódu
+let selectedBarcodeType = "auto"; // Výchozí typ čárového kódu
 let html5QrCode;
 let translations = {};
 
@@ -52,6 +52,10 @@ document.getElementById("modal-close").addEventListener("click", () => {
   document.getElementById("shop-modal").classList.add("hidden");
 });
 
+document.getElementById("barcode-type-close").addEventListener("click", () => {
+  document.getElementById("barcode-type-modal").classList.add("hidden");
+});
+
 document.getElementById("scan-type-close").addEventListener("click", () => {
   document.getElementById("scan-type-modal").classList.add("hidden");
 });
@@ -69,12 +73,16 @@ document.querySelectorAll(".shop-option").forEach(btn => {
   btn.addEventListener("click", () => {
     selectedShop = btn.dataset.shop;
     document.getElementById("shop-modal").classList.add("hidden");
-    document.getElementById("scan-type-modal").classList.remove("hidden");
+    document.getElementById("barcode-type-modal").classList.remove("hidden");
   });
 });
 
-document.getElementById("barcode-type").addEventListener("change", (e) => {
-  selectedBarcodeType = e.target.value; // Ukládá vybraný typ čárového kódu
+document.querySelectorAll(".barcode-type-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    selectedBarcodeType = btn.dataset.type;
+    document.getElementById("barcode-type-modal").classList.add("hidden");
+    document.getElementById("scan-type-modal").classList.remove("hidden");
+  });
 });
 
 document.querySelectorAll(".scan-type-btn").forEach(btn => {
@@ -157,7 +165,7 @@ function startScanner() {
         halfSample: true
       },
       decoder: {
-        readers: readers // Dynamické nastavení čteček podle typu
+        readers: readers
       },
       locate: true
     }, err => {
