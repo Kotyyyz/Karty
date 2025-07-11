@@ -111,6 +111,13 @@ document.getElementById("confirm-code").addEventListener("click", () => {
   }
 });
 
+// Enable confirm button when manual code is entered
+document.getElementById("manual-code").addEventListener("input", () => {
+  const code = document.getElementById("manual-code").value.trim();
+  const confirmButton = document.getElementById("confirm-code");
+  confirmButton.disabled = !code || code.length < 6; // Enable only if code has at least 6 characters
+});
+
 // Start scanner based on type
 function startScanner() {
   const qrDiv = document.getElementById("qr-scanner");
