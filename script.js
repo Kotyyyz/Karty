@@ -124,13 +124,18 @@ function startScanner() {
         type: "LiveStream",
         target: barcodeDiv,
         constraints: {
-          facingMode: { exact: "environment" }, // Přesnější nastavení kamery
+          facingMode: { exact: "environment" },
           width: { min: 320 },
           height: { min: 240 }
-        }
+        },
+        singleChannel: false // Povolení zpracování barev pro lepší detekci
+      },
+      locator: {
+        patchSize: "medium", // Přizpůsobení velikosti pro vybledlé kódy
+        halfSample: true // Snížení rozlišení pro rychlejší zpracování
       },
       decoder: {
-        readers: ["code_128_reader"] // Zaměření na Code 128
+        readers: ["code_128_reader", "ean_reader", "upc_reader"] // Širší podpora
       },
       locate: true
     }, err => {
@@ -144,7 +149,7 @@ function startScanner() {
       Quagga.onDetected(data => {
         if (data && data.codeResult && data.codeResult.code) {
           const code = cleanCode(data.codeResult.code);
-          console.log("Detekovaný kód:", code); // Výstup pro ladění
+          console.log("Detekovaný kód:", code);
           if (code.length > 6) {
             Quagga.stop();
             saveCard(selectedShop, code);
@@ -208,7 +213,7 @@ document.getElementById("image-upload").addEventListener("change", function (e) 
           src: reader.result,
           numOfWorkers: 0,
           decoder: {
-            readers: ["code_128_reader"]
+            readers: ["code_128_reader", "ean_reader", "upc_reader"]
           },
           locate: true
         }, function (result) {
@@ -287,6 +292,7 @@ function getIcon(shop) {
     case "Billa": return "🛑";
     case "Penny": return "🛠";
     case "Biedronka": return "🐞";
+    case "beYPc": return "⛽";
     case "Mountfield": return "🌱";
     case "Metro": return "🏬";
     case "Coop Jednota": return "🏠";
@@ -305,6 +311,7 @@ function getCardColor(shop) {
     case "Billa": return "bg-yellow-500 text-black";
     case "Penny": return "bg-orange-600 text-white";
     case "Biedronka": return "bg-red-700 text-white";
+    case "beYPc": return "bg-green-600 text-white";
     case "Mountfield": return "bg-green-400 text-white";
     case "Metro": return "bg-gray-700 text-white";
     case "Coop Jednota": return "bg-blue-400 text-white";
