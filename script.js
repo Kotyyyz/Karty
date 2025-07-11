@@ -288,6 +288,10 @@ function getIcon(shop) {
     case "Penny": return "🛠";
     case "Biedronka": return "🐞";
     case "beYPc": return "⛽";
+    case "Mountfield": return "🌱";
+    case "Metro": return "🏬";
+    case "Coop Jednota": return "🏠";
+    case "Dr Max Club": return "💊";
     default: return "📦";
   }
 }
@@ -303,6 +307,10 @@ function getCardColor(shop) {
     case "Penny": return "bg-orange-600 text-white";
     case "Biedronka": return "bg-red-700 text-white";
     case "beYPc": return "bg-green-600 text-white";
+    case "Mountfield": return "bg-green-400 text-white";
+    case "Metro": return "bg-gray-700 text-white";
+    case "Coop Jednota": return "bg-blue-400 text-white";
+    case "Dr Max Club": return "bg-purple-500 text-white";
     default: return "bg-gray-200 text-black";
   }
 }
