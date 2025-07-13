@@ -310,6 +310,7 @@ function deleteCard(index) {
   cards.splice(index, 1);
   localStorage.setItem("cards", JSON.stringify(cards));
   renderCards();
+  document.getElementById("display-modal").classList.add("hidden");
 }
 
 // Render cards
@@ -325,12 +326,7 @@ function renderCards() {
     div.innerHTML = `
       <div class="text-4xl">${getIcon(card.shop)}</div>
       <div class="text-lg font-semibold mt-2">${card.shop}</div>
-      <button class="absolute top-2 right-2 ${isDark ? 'text-white/70' : 'text-black/60'} hover:text-red-500">🗑</button>
     `;
-    div.querySelector("button").onclick = (e) => {
-      e.stopPropagation();
-      deleteCard(index);
-    };
     div.onclick = () => showBarcode(card.code, card.barcodeType);
     grid.appendChild(div);
   });
@@ -389,11 +385,16 @@ function showBarcode(code, barcodeType) {
   const title = document.getElementById("display-title");
   const img = document.getElementById("display-code-img");
   const text = document.getElementById("display-code-text");
+  const deleteBtn = document.getElementById("delete-card");
   title.textContent = card.shop;
   text.textContent = card.code;
   img.src = card.type === "qr" 
     ? `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(card.code)}&size=200x200`
     : `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(card.code)}&code=${barcodeType === "code_128" ? "Code128" : "EAN13"}`;
+  deleteBtn.onclick = () => {
+    const index = cards.findIndex(c => c.code === code);
+    if (index !== -1) deleteCard(index);
+  };
   modal.classList.remove("hidden");
 }
 
